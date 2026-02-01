@@ -348,22 +348,32 @@ async function requestCode(): Promise<void> {
   renderStep("loading", "Sending code...");
 
   try {
-    const response = await fetch(`${API_URL}/auth/request-code`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: userEmail,
-        isRegister: currentMode === "register",
-        name: currentMode === "register" ? userName : undefined,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(
-        error.error?.message || error.message || "Failed to send code",
+    // Use background script to avoid CORS issues in content script
+    const response: any = await new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        {
+          action: "apiRequest",
+          endpoint: "/auth/request-code",
+          method: "POST",
+          body: {
+            email: userEmail,
+            isRegister: currentMode === "register",
+            name: currentMode === "register" ? userName : undefined,
+          },
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+            return;
+          }
+          if (response.success) {
+            resolve(response.data);
+          } else {
+            reject(new Error(response.error || "Failed to send code"));
+          }
+        },
       );
-    }
+    });
 
     renderStep("code");
   } catch (error) {
@@ -380,22 +390,31 @@ async function verifyCode(code: string): Promise<void> {
   renderStep("loading", "Verifying code...");
 
   try {
-    const response = await fetch(`${API_URL}/auth/verify-code`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // Important: include cookies
-      body: JSON.stringify({
-        email: userEmail,
-        code,
-      }),
+    // Use background script to avoid CORS issues in content script
+    const data: any = await new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        {
+          action: "apiRequest",
+          endpoint: "/auth/verify-code",
+          method: "POST",
+          body: {
+            email: userEmail,
+            code,
+          },
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+            return;
+          }
+          if (response.success) {
+            resolve(response.data);
+          } else {
+            reject(new Error(response.error || "Invalid code"));
+          }
+        },
+      );
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || error.message || "Invalid code");
-    }
-
-    const data = await response.json();
 
     // Store tokens using correct storage keys for extension
     await chrome.storage.local.set({
