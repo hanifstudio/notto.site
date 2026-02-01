@@ -22,15 +22,11 @@ app.use(
   cors({
     origin: (origin, c) => {
       // Chrome extension background service workers don't send Origin header
-      // Check if request is from extension via other headers
-      const referer = c.req.header("Referer");
-      const userAgent = c.req.header("User-Agent");
-
-      // Allow requests with no origin (like mobile apps, curl, or extension background scripts)
+      // For requests without origin, we can't use credentials, so return a safe default
       if (!origin) {
-        // If there's a referer but no origin, it's likely from an extension background script
-        // This is safe because we validate the extension ID in manifest.json host_permissions
-        return "*";
+        // Return a specific origin instead of "*" to allow credentials
+        // Background scripts don't need credentials anyway since they use Authorization header
+        return "https://notto.site";
       }
 
       // Allow localhost for development
