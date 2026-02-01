@@ -3488,10 +3488,8 @@ app.use(
   "*",
   cors({
     origin: (origin, c) => {
-      const referer = c.req.header("Referer");
-      const userAgent = c.req.header("User-Agent");
       if (!origin) {
-        return "*";
+        return "https://notto.site";
       }
       if (origin === "http://localhost:3000" || origin === "http://localhost:3001")
         return origin;
