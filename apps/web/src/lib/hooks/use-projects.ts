@@ -53,7 +53,7 @@ export function useCreateProject(workspaceId: string) {
       const data = await apiClient.createProject(
         workspaceId,
         name,
-        description
+        description,
       );
       return data.project;
     },
@@ -84,6 +84,19 @@ export function useUpdateProject(workspaceId: string) {
         description,
       });
       return data.project;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", workspaceId] });
+    },
+  });
+}
+
+export function useDeleteProject(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.deleteProject(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects", workspaceId] });

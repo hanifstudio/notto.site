@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useWorkspaces, useCreateWorkspace } from "@/lib/hooks";
 import { EmptyState } from "@/components/dashboard";
+import { PricingModal } from "@/components/PricingModal";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -12,6 +13,10 @@ export default function DashboardPage() {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
+  const [showPricingModal, setShowPricingModal] = useState(false);
+
+  const isPricingGateEnabled =
+    process.env.NEXT_PUBLIC_ENABLE_PRICING_GATE === "true";
 
   const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +37,14 @@ export default function DashboardPage() {
   const closeModal = () => {
     setShowCreateModal(false);
     setNewWorkspaceName("");
+  };
+
+  const handleCreateWorkspaceClick = () => {
+    if (isPricingGateEnabled) {
+      setShowPricingModal(true);
+    } else {
+      setShowCreateModal(true);
+    }
   };
 
   if (isLoading) {
@@ -78,7 +91,7 @@ export default function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-8">
         <EmptyState
           type="no-workspaces"
-          onAction={() => setShowCreateModal(true)}
+          onAction={handleCreateWorkspaceClick}
         />
         {showCreateModal && (
           <CreateWorkspaceModal
@@ -90,6 +103,11 @@ export default function DashboardPage() {
             isLoading={createWorkspace.isPending}
           />
         )}
+        <PricingModal
+          isOpen={showPricingModal}
+          onClose={() => setShowPricingModal(false)}
+          trigger="workspace"
+        />
       </div>
     );
   }
@@ -127,7 +145,7 @@ export default function DashboardPage() {
             </button>
           ))}
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={handleCreateWorkspaceClick}
             className="w-full p-4 border border-dashed border-neutral-300 rounded-lg hover:border-neutral-400 hover:bg-neutral-50 transition-all flex items-center gap-4 text-left min-h-[44px]"
           >
             <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center">
@@ -153,6 +171,11 @@ export default function DashboardPage() {
           isLoading={createWorkspace.isPending}
         />
       )}
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+        trigger="workspace"
+      />
     </div>
   );
 }

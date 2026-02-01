@@ -349,6 +349,12 @@ class ApiClient {
     });
   }
 
+  async deleteProject(id: string) {
+    return this.fetch<void>(`/projects/${id}`, {
+      method: "DELETE",
+    });
+  }
+
   // Annotation endpoints
   async getAnnotations(projectId: string) {
     return this.fetch<{

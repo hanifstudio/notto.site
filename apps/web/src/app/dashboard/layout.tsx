@@ -9,8 +9,11 @@ import {
   useProjects,
   useCreateWorkspace,
   useCreateProject,
+  useUpdateProject,
+  useDeleteProject,
 } from "@/lib/hooks";
 import { AuthGuard } from "@/components/AuthGuard";
+import { PricingModal } from "@/components/PricingModal";
 
 export default function DashboardLayout({
   children,
@@ -30,6 +33,19 @@ export default function DashboardLayout({
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
   const [showIntegrationGuideModal, setShowIntegrationGuideModal] =
     useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [pricingModalTrigger, setPricingModalTrigger] = useState<
+    "workspace" | "project"
+  >("workspace");
+  const [projectMenuOpen, setProjectMenuOpen] = useState<string | null>(null);
+  const [renameProjectId, setRenameProjectId] = useState<string | null>(null);
+  const [renameProjectName, setRenameProjectName] = useState("");
+  const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
+  const [deleteProjectName, setDeleteProjectName] = useState("");
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
+
+  const isPricingGateEnabled =
+    process.env.NEXT_PUBLIC_ENABLE_PRICING_GATE === "true";
 
   // Fetch workspaces
   const { data: workspaces = [] } = useWorkspaces();
@@ -46,6 +62,8 @@ export default function DashboardLayout({
 
   // Fetch projects for current workspace
   const { data: projects = [] } = useProjects(currentWorkspace?.id || "");
+  const updateProject = useUpdateProject(currentWorkspace?.id || "");
+  const deleteProject = useDeleteProject(currentWorkspace?.id || "");
 
   // Handle responsive behavior
   useEffect(() => {
@@ -71,10 +89,12 @@ export default function DashboardLayout({
       // Only close if clicking outside dropdown areas
       if (
         !target.closest('[data-dropdown="workspace"]') &&
-        !target.closest('[data-dropdown="user"]')
+        !target.closest('[data-dropdown="user"]') &&
+        !target.closest('[data-dropdown="project-menu"]')
       ) {
         setShowWorkspaceDropdown(false);
         setShowUserDropdown(false);
+        setProjectMenuOpen(null);
       }
     };
     document.addEventListener("click", handleClickOutside);
@@ -99,7 +119,58 @@ export default function DashboardLayout({
 
   const openCreateWorkspaceModal = () => {
     setShowWorkspaceDropdown(false);
-    setShowCreateWorkspaceModal(true);
+    if (isPricingGateEnabled) {
+      setPricingModalTrigger("workspace");
+      setShowPricingModal(true);
+    } else {
+      setShowCreateWorkspaceModal(true);
+    }
+  };
+
+  const handleCreateProjectClick = () => {
+    if (isPricingGateEnabled && projects.length >= 3) {
+      setPricingModalTrigger("project");
+      setShowPricingModal(true);
+    } else {
+      setShowCreateProjectModal(true);
+    }
+  };
+
+  const handleRenameProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!renameProjectId || !renameProjectName.trim()) return;
+
+    try {
+      await updateProject.mutateAsync({
+        id: renameProjectId,
+        name: renameProjectName.trim(),
+      });
+      setRenameProjectId(null);
+      setRenameProjectName("");
+    } catch (err) {
+      console.error("Failed to rename project:", err);
+    }
+  };
+
+  const handleDeleteProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!deleteProjectId || deleteConfirmName !== deleteProjectName) return;
+
+    try {
+      await deleteProject.mutateAsync(deleteProjectId);
+      setDeleteProjectId(null);
+      setDeleteProjectName("");
+      setDeleteConfirmName("");
+      // Redirect to workspace home if we're on the deleted project
+      if (
+        currentProjectSlug ===
+        projects.find((p) => p.id === deleteProjectId)?.slug
+      ) {
+        router.push(`/dashboard/${workspaceSlug}`);
+      }
+    } catch (err) {
+      console.error("Failed to delete project:", err);
+    }
   };
 
   const handleIntegrationClick = () => {
@@ -346,7 +417,7 @@ export default function DashboardLayout({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowCreateProjectModal(true);
+                  handleCreateProjectClick();
                 }}
                 className="p-1 hover:bg-neutral-100 rounded transition-colors"
               >
@@ -365,32 +436,111 @@ export default function DashboardLayout({
                 </div>
               ) : (
                 projects.map((project) => (
-                  <Link
+                  <div
                     key={project.id}
-                    href={`/dashboard/${workspaceSlug}/projects/${project.slug}`}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
-                      currentProjectSlug === project.slug
-                        ? "bg-neutral-100 text-neutral-900"
-                        : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                    }`}
+                    className="relative group"
+                    data-dropdown="project-menu"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <iconify-icon
-                        icon="lucide:folder"
-                        className={
-                          currentProjectSlug === project.slug
-                            ? "text-accent"
-                            : "text-neutral-400"
-                        }
-                      ></iconify-icon>
-                      <span className="text-sm font-medium truncate">
-                        {project.name}
-                      </span>
-                    </div>
-                    <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
-                      {project.annotationCount}
-                    </span>
-                  </Link>
+                    <Link
+                      href={`/dashboard/${workspaceSlug}/projects/${project.slug}`}
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
+                        currentProjectSlug === project.slug
+                          ? "bg-neutral-100 text-neutral-900"
+                          : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <iconify-icon
+                          icon="lucide:folder"
+                          className={
+                            currentProjectSlug === project.slug
+                              ? "text-accent"
+                              : "text-neutral-400"
+                          }
+                        ></iconify-icon>
+                        <span className="text-sm font-medium truncate">
+                          {project.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
+                          {project.annotationCount}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setProjectMenuOpen(
+                              projectMenuOpen === project.id
+                                ? null
+                                : project.id,
+                            );
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-neutral-200 rounded transition-all"
+                        >
+                          <iconify-icon
+                            icon="lucide:more-vertical"
+                            className="text-neutral-500 text-sm"
+                          ></iconify-icon>
+                        </button>
+                      </div>
+                    </Link>
+
+                    {/* Project menu popover */}
+                    {projectMenuOpen === project.id && (
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg border border-neutral-200 shadow-lg py-1 z-50">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProjectMenuOpen(null);
+                            setRenameProjectName(project.name);
+                            setRenameProjectId(project.id);
+                          }}
+                          className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-50 transition-colors text-neutral-700 w-full text-left"
+                        >
+                          <iconify-icon
+                            icon="lucide:pencil"
+                            className="text-neutral-400"
+                          ></iconify-icon>
+                          <span className="text-sm">Rename</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProjectMenuOpen(null);
+                            // TODO: Navigate to integration settings
+                            router.push(
+                              `/dashboard/${workspaceSlug}/projects/${project.slug}/settings`,
+                            );
+                          }}
+                          className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-50 transition-colors text-neutral-700 w-full text-left"
+                        >
+                          <iconify-icon
+                            icon="lucide:plug"
+                            className="text-neutral-400"
+                          ></iconify-icon>
+                          <span className="text-sm">Integration</span>
+                        </button>
+                        <div className="border-t border-neutral-100 my-1"></div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProjectMenuOpen(null);
+                            setDeleteProjectName(project.name);
+                            setDeleteProjectId(project.id);
+                            setDeleteConfirmName("");
+                          }}
+                          className="flex items-center gap-3 px-4 py-2 hover:bg-red-50 transition-colors text-red-600 w-full text-left"
+                        >
+                          <iconify-icon
+                            icon="lucide:trash-2"
+                            className="text-red-500"
+                          ></iconify-icon>
+                          <span className="text-sm">Delete</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ))
               )}
             </nav>
@@ -611,6 +761,152 @@ export default function DashboardLayout({
                   Got it
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Pricing Modal */}
+        <PricingModal
+          isOpen={showPricingModal}
+          onClose={() => setShowPricingModal(false)}
+          trigger={pricingModalTrigger}
+        />
+
+        {/* Rename Project Modal */}
+        {renameProjectId && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+              <div className="p-6 border-b border-neutral-100">
+                <h3 className="text-xl font-instrument-serif text-neutral-900">
+                  Rename Project
+                </h3>
+                <p className="text-sm text-neutral-500 mt-1">
+                  Enter a new name for your project
+                </p>
+              </div>
+              <form onSubmit={handleRenameProject}>
+                <div className="p-6">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Project name
+                  </label>
+                  <input
+                    type="text"
+                    value={renameProjectName}
+                    onChange={(e) => setRenameProjectName(e.target.value)}
+                    placeholder="Enter project name"
+                    className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+                    autoFocus
+                  />
+                </div>
+                <div className="p-6 pt-0 flex gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRenameProjectId(null);
+                      setRenameProjectName("");
+                    }}
+                    className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={
+                      !renameProjectName.trim() || updateProject.isPending
+                    }
+                    className="px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {updateProject.isPending && (
+                      <iconify-icon
+                        icon="lucide:loader-2"
+                        className="animate-spin"
+                      ></iconify-icon>
+                    )}
+                    Rename
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Project Modal */}
+        {deleteProjectId && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+              <div className="p-6 border-b border-neutral-100">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <iconify-icon
+                      icon="lucide:alert-triangle"
+                      className="text-2xl text-red-600"
+                    ></iconify-icon>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-instrument-serif text-neutral-900">
+                      Delete Project
+                    </h3>
+                    <p className="text-sm text-neutral-500 mt-1">
+                      This action cannot be undone. All annotations in this
+                      project will be permanently deleted.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <form onSubmit={handleDeleteProject}>
+                <div className="p-6">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Type{" "}
+                    <span className="font-semibold text-neutral-900">
+                      {deleteProjectName}
+                    </span>{" "}
+                    to confirm
+                  </label>
+                  <input
+                    type="text"
+                    value={deleteConfirmName}
+                    onChange={(e) => setDeleteConfirmName(e.target.value)}
+                    placeholder="Enter project name"
+                    className="w-full px-4 py-3 border border-red-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-colors"
+                    autoFocus
+                  />
+                  {deleteConfirmName &&
+                    deleteConfirmName !== deleteProjectName && (
+                      <p className="text-sm text-red-600 mt-2">
+                        Project name doesn't match
+                      </p>
+                    )}
+                </div>
+                <div className="p-6 pt-0 flex gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeleteProjectId(null);
+                      setDeleteProjectName("");
+                      setDeleteConfirmName("");
+                    }}
+                    className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={
+                      deleteConfirmName !== deleteProjectName ||
+                      deleteProject.isPending
+                    }
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {deleteProject.isPending && (
+                      <iconify-icon
+                        icon="lucide:loader-2"
+                        className="animate-spin"
+                      ></iconify-icon>
+                    )}
+                    Delete Project
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

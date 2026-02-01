@@ -1,6 +1,7 @@
 "use client";
 import { FlipWords } from "@/components/ui/flip-words";
 import { useAuth } from "@/lib/auth-context";
+import { DownloadExtensionButton } from "@/components/DownloadExtensionButton";
 
 export default function HomePage() {
   const words = ["Linear", "Jira", "Asana", "ClickUp", "Anywhere"];
@@ -68,10 +69,10 @@ export default function HomePage() {
             to draw rectangles, arrows, and text directly on your build, then
             sync with one click.
           </p>
-          <button className="hidden md:flex items-center mx-auto gap-2 text-xs font-mono uppercase bg-neutral-900 text-white px-4 py-4 rounded hover:bg-neutral-800 transition-colors shadow-lg shadow-neutral-900/10">
-            <span>Install Extension</span>
-            <iconify-icon icon="lucide:download" width="14"></iconify-icon>
-          </button>
+          <DownloadExtensionButton
+            size="lg"
+            className="hidden md:flex mx-auto shadow-lg shadow-neutral-900/10"
+          />
         </div>
 
         {/* 3D Visualization Area */}

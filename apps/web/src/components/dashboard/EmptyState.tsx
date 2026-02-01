@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DownloadExtensionButton } from "@/components/DownloadExtensionButton";
 
 export interface EmptyStateProps {
   type: "no-workspaces" | "no-projects" | "no-annotations" | "not-found";
@@ -68,17 +69,7 @@ export function EmptyState({
     }
 
     if (type === "no-annotations") {
-      return (
-        <a
-          href="https://chrome.google.com/webstore"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-neutral-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-neutral-800 transition-colors flex items-center gap-2 min-h-[44px]"
-        >
-          <iconify-icon icon={config.actionIcon}></iconify-icon>
-          {label}
-        </a>
-      );
+      return <DownloadExtensionButton size="md" />;
     }
 
     if (onAction) {
