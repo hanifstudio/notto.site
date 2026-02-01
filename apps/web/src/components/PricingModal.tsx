@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export interface PricingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  trigger: "workspace" | "project";
+  trigger: "workspace" | "project" | "team";
 }
 
 export function PricingModal({ isOpen, onClose, trigger }: PricingModalProps) {
@@ -25,12 +25,16 @@ export function PricingModal({ isOpen, onClose, trigger }: PricingModalProps) {
   const title =
     trigger === "workspace"
       ? "Workspace Creation Temporarily Unavailable"
-      : "Project Limit Reached";
+      : trigger === "project"
+        ? "Project Limit Reached"
+        : "Team Member Limit Reached";
 
   const description =
     trigger === "workspace"
       ? "We're preparing something special for you!"
-      : "You've reached the maximum number of projects for the free tier.";
+      : trigger === "project"
+        ? "You've reached the maximum number of projects for the free tier."
+        : "You've reached the maximum number of team members for the free tier.";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -56,8 +60,6 @@ export function PricingModal({ isOpen, onClose, trigger }: PricingModalProps) {
 
         {/* Content */}
         <div className="relative p-8">
-          {/* Icon */}
-
           {/* Title */}
           <h2 className="text-2xl font-instrument-serif text-neutral-900 text-center mb-3">
             {title}
@@ -102,6 +104,13 @@ export function PricingModal({ isOpen, onClose, trigger }: PricingModalProps) {
                   className="text-green-600"
                 ></iconify-icon>
                 <span>Unlimited projects</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-neutral-700">
+                <iconify-icon
+                  icon="lucide:check"
+                  className="text-green-600"
+                ></iconify-icon>
+                <span>Unlimited team members</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-neutral-700">
                 <iconify-icon

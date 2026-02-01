@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
+import { PricingModal } from "@/components/PricingModal";
 
 interface WorkspaceMember {
   id: string;
@@ -59,6 +60,11 @@ export default function TeamManagementPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  // Pricing gate
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const isPricingGateEnabled =
+    process.env.NEXT_PUBLIC_ENABLE_PRICING_GATE === "true";
+
   // Fetch data
   useEffect(() => {
     async function fetchData() {
@@ -111,6 +117,12 @@ export default function TeamManagementPage() {
     }
 
     if (!workspace) return;
+
+    // Check pricing gate - block on 3rd invitation (when already have 2 members)
+    if (isPricingGateEnabled && members.length >= 2) {
+      setShowPricingModal(true);
+      return;
+    }
 
     setIsInviting(true);
 
@@ -582,6 +594,13 @@ export default function TeamManagementPage() {
           </div>
         </div>
       </div>
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+        trigger="workspace"
+      />
     </div>
   );
 }
