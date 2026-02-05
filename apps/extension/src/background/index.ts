@@ -348,6 +348,7 @@ chrome.action.onClicked.addListener(async (tab) => {
         func: () => {
           // @ts-ignore - showAuthPrompt is defined in auth-prompt-new.js
           if (typeof showAuthPrompt === "function") {
+            // @ts-ignore
             showAuthPrompt();
           }
         },

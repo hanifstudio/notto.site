@@ -99,7 +99,7 @@
   }
 
   .bf-action-btn {
-    @apply flex-1 px-5 py-3 rounded-lg text-sm font-medium cursor-pointer transition-all duration-150 ease-in-out text-center;
+    @apply flex-1 px-5 py-3 rounded-lg text-sm font-medium cursor-pointer transition-all duration-150 ease-in-out text-center flex items-center justify-center gap-1.5;
   }
 
   .bf-action-btn.secondary {
