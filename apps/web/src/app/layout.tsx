@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
-import { UmamiAnalytics } from "@/components/UmamiAnalytics";
 
 export const metadata: Metadata = {
   title: "Notto - Visual Bug Reporting Tool",
@@ -41,7 +40,6 @@ export default function RootLayout({
           defer
         />
       </head>
-      <UmamiAnalytics />
       <body className="min-h-screen flex flex-col relative text-neutral-900 selection:bg-red-100">
         <Providers>{children}</Providers>
       </body>

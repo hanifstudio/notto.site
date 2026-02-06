@@ -2,6 +2,7 @@
 import { FlipWords } from "@/components/ui/flip-words";
 import { useAuth } from "@/lib/auth-context";
 import { DownloadExtensionButton } from "@/components/DownloadExtensionButton";
+import { UmamiAnalytics } from "@/components/UmamiAnalytics";
 
 export default function HomePage() {
   const words = ["Linear", "Jira", "Asana", "ClickUp", "Anywhere"];
@@ -9,6 +10,7 @@ export default function HomePage() {
 
   return (
     <>
+      <UmamiAnalytics />
       {/* Tech Background Layers */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 -left-40 w-[600px] h-[600px] bg-red-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
