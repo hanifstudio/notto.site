@@ -3176,6 +3176,8 @@ async function get4(annotationId, userId) {
       message: "Access denied to this annotation"
     });
   }
+  const [project] = await db.select({ id: projects.id, name: projects.name, slug: projects.slug }).from(projects).where(eq11(projects.id, annotation.projectId)).limit(1);
+  const [user] = annotation.userId ? await db.select({ id: users.id, name: users.name, email: users.email }).from(users).where(eq11(users.id, annotation.userId)).limit(1) : [];
   return {
     id: annotation.id,
     projectId: annotation.projectId,
@@ -3191,7 +3193,9 @@ async function get4(annotationId, userId) {
     screenshotAnnotated: annotation.screenshotAnnotated,
     canvasData: annotation.canvasData,
     createdAt: annotation.createdAt,
-    updatedAt: annotation.updatedAt
+    updatedAt: annotation.updatedAt,
+    project: project ? { id: project.id, name: project.name, slug: project.slug } : void 0,
+    user: user ? { id: user.id, name: user.name || "Unknown", email: user.email } : void 0
   };
 }
 async function update3(annotationId, userId, data) {

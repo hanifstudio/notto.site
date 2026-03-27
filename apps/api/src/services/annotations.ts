@@ -170,7 +170,7 @@ async function fireWebhookAsync(
 export async function get(
   annotationId: string,
   userId: string,
-): Promise<Annotation> {
+): Promise<Annotation & { project?: { id: string; name: string; slug: string }; user?: { id: string; name: string; email: string } }> {
   const [annotation] = await db
     .select()
     .from(annotations)
@@ -189,6 +189,20 @@ export async function get(
     });
   }
 
+  // Fetch project and user data
+  const [project] = await db
+    .select({ id: projects.id, name: projects.name, slug: projects.slug })
+    .from(projects)
+    .where(eq(projects.id, annotation.projectId))
+    .limit(1);
+
+  const [user] = annotation.userId
+    ? await db
+        .select({ id: users.id, name: users.name, email: users.email })
+        .from(users)
+        .where(eq(users.id, annotation.userId))
+        .limit(1): [];
+
   return {
     id: annotation.id,
     projectId: annotation.projectId,
@@ -205,6 +219,8 @@ export async function get(
     canvasData: annotation.canvasData,
     createdAt: annotation.createdAt,
     updatedAt: annotation.updatedAt,
+    project: project ? { id: project.id, name: project.name, slug: project.slug } : undefined,
+    user: user ? { id: user.id, name: user.name || "Unknown", email: user.email } : undefined,
   };
 }
 
