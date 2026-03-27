@@ -103,3 +103,14 @@ export function useDeleteProject(workspaceId: string) {
     },
   });
 }
+
+export function useIntegration(projectId: string) {
+  return useQuery({
+    queryKey: ["integration", projectId],
+    queryFn: async () => {
+      const data = await apiClient.getIntegration(projectId);
+      return data.integration;
+    },
+    enabled: !!projectId,
+  });
+}

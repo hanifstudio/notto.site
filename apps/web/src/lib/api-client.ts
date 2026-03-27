@@ -422,6 +422,15 @@ class ApiClient {
     });
   }
 
+  async resendWebhook(annotationId: string) {
+    return this.fetch<{ success: boolean; message: string }>(
+      `/annotations/${annotationId}/resend-webhook`,
+      {
+        method: "POST",
+      },
+    );
+  }
+
   // Integration endpoints
   async getIntegration(projectId: string) {
     return this.fetch<{
@@ -650,6 +659,29 @@ class ApiClient {
     return this.fetch<void>(`/invitations/${token}/decline`, {
       method: "POST",
     });
+  }
+
+  // LemonSqueezy checkout endpoints
+  async generateCheckoutUrl() {
+    return this.fetch<{ checkoutUrl: string }>("/checkout", {
+      method: "POST",
+    });
+  }
+
+  async getRemainingSlots() {
+    return this.fetch<{
+      total: number;
+      sold: number;
+      remaining: number;
+    }>("/checkout/slots");
+  }
+
+  async validateLicense() {
+    return this.fetch<{
+      tier: "free" | "lifetime";
+      isActive: boolean;
+      hasLifetimeAccess: boolean;
+    }>("/licenses/validate");
   }
 }
 

@@ -41,3 +41,11 @@ annotationRoutes.delete("/:id", async (c) => {
   await annotationService.remove(annotationId, userId);
   return c.body(null, 204);
 });
+
+// POST /annotations/:id/resend-webhook - Resend webhook for annotation
+annotationRoutes.post("/:id/resend-webhook", async (c) => {
+  const userId = c.get("userId");
+  const annotationId = c.req.param("id");
+  const result = await annotationService.resendWebhook(annotationId, userId);
+  return c.json(result);
+});

@@ -133,6 +133,14 @@ export function useUpdateAnnotationStatus() {
   });
 }
 
+export function useResendWebhook() {
+  return useMutation({
+    mutationFn: async (annotationId: string) => {
+      return apiClient.resendWebhook(annotationId);
+    },
+  });
+}
+
 // Hook to get all annotations for a workspace (across all projects)
 export function useWorkspaceAnnotations(
   workspaceId: string,

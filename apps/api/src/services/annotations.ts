@@ -83,8 +83,8 @@ export async function create(
     })
     .returning();
 
-  // Fire webhook asynchronously (don't await - don't block annotation creation)
-  fireWebhookAsync(projectId, userId, newAnnotation);
+  // Fire webhook - must await to ensure it completes in serverless environments
+  await fireWebhookAsync(projectId, userId, newAnnotation);
 
   return {
     id: newAnnotation.id,
@@ -297,4 +297,63 @@ export async function remove(
   }
 
   await db.delete(annotations).where(eq(annotations.id, annotationId));
+}
+
+export async function resendWebhook(
+  annotationId: string,
+  userId: string,
+): Promise<{ success: boolean; message: string }> {
+  const [annotation] = await db
+    .select()
+    .from(annotations)
+    .where(eq(annotations.id, annotationId))
+    .limit(1);
+
+  if (!annotation) {
+    throw new HTTPException(404, { message: "Annotation not found" });
+  }
+
+  const hasAccess = await checkProjectAccess(annotation.projectId, userId);
+  if (!hasAccess) {
+    throw new HTTPException(403, {
+      message: "Access denied to this annotation",
+    });
+  }
+
+  const [user] = await db
+    .select({ name: users.name, email: users.email })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  const [project] = await db
+    .select({ name: projects.name })
+    .from(projects)
+    .where(eq(projects.id, annotation.projectId))
+    .limit(1);
+
+  if (!user || !project) {
+    throw new HTTPException(404, { message: "User or project not found" });
+  }
+
+  await fireWebhookIfEnabled(annotation.projectId, {
+    id: annotation.id,
+    title: annotation.title,
+    description: annotation.description,
+    pageUrl: annotation.pageUrl,
+    pageTitle: annotation.pageTitle,
+    screenshotAnnotated: annotation.screenshotAnnotated,
+    priority: annotation.priority,
+    type: annotation.type,
+    createdBy: {
+      name: user.name || "Unknown",
+      email: user.email,
+    },
+    project: {
+      name: project.name,
+    },
+    createdAt: annotation.createdAt.toISOString(),
+  });
+
+  return { success: true, message: "Webhook sent successfully" };
 }

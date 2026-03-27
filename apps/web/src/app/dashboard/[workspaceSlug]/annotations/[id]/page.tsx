@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { useAnnotation, useUpdateAnnotationStatus } from "@/lib/hooks";
+import { useAnnotation, useUpdateAnnotationStatus, useResendWebhook, useIntegration } from "@/lib/hooks";
 import { EmptyState } from "@/components/dashboard";
 import { formatDate } from "@/components/dashboard/AnnotationCard";
 
@@ -33,7 +33,12 @@ export default function AnnotationDetailPage() {
 
   const { data: annotation, isLoading, error } = useAnnotation(annotationId);
   const updateStatus = useUpdateAnnotationStatus();
+  const resendWebhook = useResendWebhook();
   const isDone = annotation?.status === "done";
+
+  const { data: integration } = useIntegration(annotation?.project?.id || "");
+  const hasIntegration = integration && integration.enabled;
+  const [sendingWebhook, setSendingWebhook] = useState(false);
 
   const handleStatusToggle = () => {
     if (!annotation) return;
@@ -48,6 +53,18 @@ export default function AnnotationDetailPage() {
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSendToIntegration = async () => {
+    if (!annotation) return;
+    setSendingWebhook(true);
+    try {
+      await resendWebhook.mutateAsync(annotation.id);
+    } catch {
+      // Error is handled by the mutation
+    } finally {
+      setSendingWebhook(false);
+    }
   };
 
   if (isLoading) {
@@ -261,7 +278,7 @@ export default function AnnotationDetailPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <button
             onClick={handleStatusToggle}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -275,6 +292,19 @@ export default function AnnotationDetailPage() {
             ></iconify-icon>
             {isDone ? "Mark as Open" : "Mark as Done"}
           </button>
+          {hasIntegration && (
+            <button
+              onClick={handleSendToIntegration}
+              disabled={sendingWebhook}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 rounded-lg text-sm font-medium text-white transition-colors"
+            >
+              <iconify-icon
+                icon={sendingWebhook ? "lucide:loader-2" : "lucide:send"}
+                className={sendingWebhook ? "animate-spin" : ""}
+              ></iconify-icon>
+              {sendingWebhook ? "Sending..." : "Send to Integration"}
+            </button>
+          )}
           <button
             onClick={handleCopyLink}
             className="flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm font-medium text-neutral-700 transition-colors"
