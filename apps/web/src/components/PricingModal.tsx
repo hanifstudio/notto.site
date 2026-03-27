@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRemainingSlots, useGenerateCheckout } from "@/lib/hooks";
 
 export interface PricingModalProps {
   isOpen: boolean;
@@ -9,6 +10,10 @@ export interface PricingModalProps {
 }
 
 export function PricingModal({ isOpen, onClose, trigger }: PricingModalProps) {
+  const { data: slotsData, isLoading: isSlotsLoading } = useRemainingSlots();
+  const { mutate: generateCheckout, isPending: isCheckoutLoading } =
+    useGenerateCheckout();
+
   // Close on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -20,21 +25,36 @@ export function PricingModal({ isOpen, onClose, trigger }: PricingModalProps) {
     }
   }, [isOpen, onClose]);
 
+  const handleUpgrade = () => {
+    generateCheckout();
+  };
+
+  type BenefitType = {
+    label: string;
+    icon: string;
+  };
+
+  const benefit: BenefitType[] = [
+    {
+      label: "Run up to 5 Workspaces & 30 Projects",
+      icon: "lucide:check",
+    },
+    {
+      label: "Invite up to 10 Team Members",
+      icon: "lucide:check",
+    },
+    {
+      label: "Unlimited annotations",
+      icon: "lucide:check",
+    },
+    {
+      label: "Automation ready with webhooks",
+      icon: "lucide:check",
+    },
+  ];
+
+  // Don't render if not open
   if (!isOpen) return null;
-
-  const title =
-    trigger === "workspace"
-      ? "Workspace Creation Temporarily Unavailable"
-      : trigger === "project"
-        ? "Project Limit Reached"
-        : "Team Member Limit Reached";
-
-  const description =
-    trigger === "workspace"
-      ? "We're preparing something special for you!"
-      : trigger === "project"
-        ? "You've reached the maximum number of projects for the free tier."
-        : "You've reached the maximum number of team members for the free tier.";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -45,101 +65,70 @@ export function PricingModal({ isOpen, onClose, trigger }: PricingModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-scale-in">
+      <div className="relative bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-in">
         {/* Gradient header background */}
-        <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 opacity-10" />
+        <div className="absolute top-0 left-0 right-0 h-fit bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 opacity-10" />
 
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-all"
+          className="flex flex-col items-center justify-center absolute size-8 top-4 right-4 z-10 text-neutral-100 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-all"
           aria-label="Close modal"
         >
           <iconify-icon icon="lucide:x" className="text-xl"></iconify-icon>
         </button>
 
         {/* Content */}
-        <div className="relative p-8">
+        <div className="relative p-8 text-white">
           {/* Title */}
-          <h2 className="text-2xl font-instrument-serif text-neutral-900 text-center mb-3">
-            {title}
+          <h2 className="text-4xl md:text-5xl font-instrument-serif text-center leading-tighter mb-10">
+            Yearly Access
           </h2>
 
-          {/* Description */}
-          <p className="text-neutral-600 text-center mb-6">{description}</p>
+          <div className="mx-auto w-fit mb-5">
+            <p className="leading-tight text-center mb-2">
+              <span className=" font-instrument-serif line-through opacity-75 text-xl mr-1">
+                $144.00
+              </span>{" "}
+              80% off
+            </p>
+
+            <h3 className="text-6xl md:text-7xl font-instrument-serif font-semibold text-center ">
+              $28<span className="text-4xl">.00</span>
+            </h3>
+          </div>
 
           {/* Pricing announcement */}
-          <div className="bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 rounded-xl p-6 mb-6 border border-orange-100">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
-                <iconify-icon
-                  icon="lucide:zap"
-                  className="text-white text-lg"
-                ></iconify-icon>
-              </div>
-              <div>
-                <h3 className="font-semibold text-neutral-900 mb-1">
-                  Lifetime Pricing Coming Soon
-                </h3>
-                <p className="text-sm text-neutral-600">
-                  We're finalizing our payment integration with Lemon Squeezy.
-                  Soon you'll be able to unlock unlimited workspaces and
-                  projects with a one-time payment.
-                </p>
-              </div>
-            </div>
-
+          <div className="mx-auto w-fit mb-10">
             {/* Features preview */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-neutral-700">
-                <iconify-icon
-                  icon="lucide:check"
-                  className="text-green-600"
-                ></iconify-icon>
-                <span>Unlimited workspaces</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-neutral-700">
-                <iconify-icon
-                  icon="lucide:check"
-                  className="text-green-600"
-                ></iconify-icon>
-                <span>Unlimited projects</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-neutral-700">
-                <iconify-icon
-                  icon="lucide:check"
-                  className="text-green-600"
-                ></iconify-icon>
-                <span>Unlimited team members</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-neutral-700">
-                <iconify-icon
-                  icon="lucide:check"
-                  className="text-green-600"
-                ></iconify-icon>
-                <span>Priority support</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-neutral-700">
-                <iconify-icon
-                  icon="lucide:check"
-                  className="text-green-600"
-                ></iconify-icon>
-                <span>One-time payment, lifetime access</span>
-              </div>
+            <div className="space-y-2 flex flex-col items-center justify-center">
+              {benefit.map((benefit, index) => (
+                <div key={index} className="flex items-center gap-3 w-fit">
+                  <iconify-icon
+                    icon={benefit.icon}
+                    className="text-green-300 text-lg"
+                  ></iconify-icon>
+                  <p>{benefit.label}</p>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* CTA */}
-          <div className="text-center">
-            <p className="text-sm text-neutral-500 mb-4">
-              Want to be notified when lifetime pricing launches?
-            </p>
+          <div className="space-y-3 items-center flex flex-col">
             <button
-              onClick={onClose}
-              className="w-full px-6 py-3 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-lg font-medium hover:shadow-lg hover:scale-105 transition-all"
+              onClick={handleUpgrade}
+              disabled={isCheckoutLoading}
+              className="w-fit px-6 py-3 bg-white text-pink-600 rounded-lg font-medium hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              Got it, I'll wait!
+              {isCheckoutLoading ? "Loading..." : "Get Yearly Access →"}
             </button>
+            <p className="text-xs">
+              Only{" "}
+              {!isSlotsLoading && slotsData
+                ? `${slotsData.remaining} slots left`
+                : "Limited slots available"}
+            </p>
           </div>
         </div>
       </div>

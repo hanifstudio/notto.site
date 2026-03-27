@@ -6,6 +6,7 @@ import {
   workspaceMembers,
   projects,
   annotations,
+  users,
 } from "@notto/shared/db";
 import { generateSlug, generateUniqueSlug } from "../utils/slug";
 import type {
@@ -58,6 +59,31 @@ export async function create(
   userId: string,
   data: CreateWorkspaceInput,
 ): Promise<Workspace> {
+  // Check subscription tier for workspace limit
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!user) {
+    throw new HTTPException(404, { message: "User not found" });
+  }
+
+  // Free tier: limit to 1 workspace
+  if (user.subscriptionTier === "free") {
+    const existingWorkspaces = await db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.ownerId, userId));
+
+    if (existingWorkspaces.length >= 1) {
+      throw new HTTPException(403, {
+        message: "Free tier limited to 1 workspace. Upgrade to create more.",
+      });
+    }
+  }
+
   // Get existing slugs to ensure uniqueness
   const existingWorkspaces = await db
     .select({ slug: workspaces.slug })

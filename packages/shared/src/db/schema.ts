@@ -12,15 +12,23 @@ import {
 import { relations } from "drizzle-orm";
 
 // Users table
-export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  email: varchar("email", { length: 255 }).unique().notNull(),
-  passwordHash: varchar("password_hash", { length: 255 }), // Nullable for magic link auth
-  name: varchar("name", { length: 255 }),
-  profilePicture: text("profile_picture"), // URL to profile picture
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: varchar("email", { length: 255 }).unique().notNull(),
+    passwordHash: varchar("password_hash", { length: 255 }), // Nullable for magic link auth
+    name: varchar("name", { length: 255 }),
+    profilePicture: text("profile_picture"), // URL to profile picture
+    subscriptionTier: varchar("subscription_tier", { length: 20 })
+      .default("free")
+      .notNull(),
+    hasLifetimeAccess: boolean("has_lifetime_access").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [index("idx_users_subscription_tier").on(table.subscriptionTier)],
+);
 
 // Magic Link Tokens table
 export const magicLinkTokens = pgTable(
@@ -241,12 +249,70 @@ export const annotations = pgTable("annotations", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Licenses table (LemonSqueezy purchases)
+export const licenses = pgTable(
+  "licenses",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    licenseKey: varchar("license_key", { length: 255 }).unique().notNull(),
+    lemonsqueezyOrderId: varchar("lemonsqueezy_order_id", { length: 255 })
+      .unique()
+      .notNull(),
+    lemonsqueezySubscriptionId: varchar("lemonsqueezy_subscription_id", {
+      length: 255,
+    }),
+    status: varchar("status", { length: 20 }).default("active").notNull(),
+    purchasedAt: timestamp("purchased_at").defaultNow().notNull(),
+    refundedAt: timestamp("refunded_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_licenses_user_id").on(table.userId),
+    index("idx_licenses_license_key").on(table.licenseKey),
+    index("idx_licenses_order_id").on(table.lemonsqueezyOrderId),
+  ],
+);
+
+// User Subscriptions table
+export const userSubscriptions = pgTable(
+  "user_subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .unique()
+      .notNull(),
+    tier: varchar("tier", { length: 20 }).default("free").notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    licenseId: uuid("license_id").references(() => licenses.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [index("idx_user_subscriptions_user_id").on(table.userId)],
+);
+
+// Webhooks Processed table (for idempotency)
+export const webhooksProcessed = pgTable("webhooks_processed", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  eventId: varchar("event_id", { length: 255 }).unique().notNull(),
+  eventName: varchar("event_name", { length: 100 }).notNull(),
+  processedAt: timestamp("processed_at").defaultNow().notNull(),
+});
+
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   workspaces: many(workspaces),
   workspaceMembers: many(workspaceMembers),
   annotations: many(annotations),
   sessions: many(sessions),
+  licenses: many(licenses),
+  subscription: one(userSubscriptions),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -324,6 +390,28 @@ export const annotationsRelations = relations(annotations, ({ one }) => ({
   }),
 }));
 
+export const licensesRelations = relations(licenses, ({ one }) => ({
+  user: one(users, {
+    fields: [licenses.userId],
+    references: [users.id],
+  }),
+  subscription: one(userSubscriptions),
+}));
+
+export const userSubscriptionsRelations = relations(
+  userSubscriptions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userSubscriptions.userId],
+      references: [users.id],
+    }),
+    license: one(licenses, {
+      fields: [userSubscriptions.licenseId],
+      references: [licenses.id],
+    }),
+  }),
+);
+
 // Type exports
 export type UserRecord = typeof users.$inferSelect;
 export type NewUserRecord = typeof users.$inferInsert;
@@ -354,3 +442,9 @@ export type OAuthAuthorizationCodeRecord =
   typeof oauthAuthorizationCodes.$inferSelect;
 export type NewOAuthAuthorizationCodeRecord =
   typeof oauthAuthorizationCodes.$inferInsert;
+export type LicenseRecord = typeof licenses.$inferSelect;
+export type NewLicenseRecord = typeof licenses.$inferInsert;
+export type UserSubscriptionRecord = typeof userSubscriptions.$inferSelect;
+export type NewUserSubscriptionRecord = typeof userSubscriptions.$inferInsert;
+export type WebhookProcessedRecord = typeof webhooksProcessed.$inferSelect;
+export type NewWebhookProcessedRecord = typeof webhooksProcessed.$inferInsert;

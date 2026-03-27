@@ -7,6 +7,7 @@ import {
   generateTokens,
   generateUniqueSlug,
   getUser,
+  licenses,
   login,
   magicLinkTokens,
   oauthAuthorizationCodes,
@@ -16,17 +17,19 @@ import {
   register,
   sessions,
   updateUser,
+  userSubscriptions,
   users,
   validateSession,
   verificationCodes,
   webhookIntegrations,
+  webhooksProcessed,
   workspaceInvitations,
   workspaceMembers,
   workspaces
-} from "./chunk-SWCWKGH4.js";
+} from "./chunk-XIIQX3IC.js";
 
 // src/index.ts
-import { Hono as Hono9 } from "hono";
+import { Hono as Hono12 } from "hono";
 import { handle } from "hono/vercel";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -1549,6 +1552,18 @@ async function list(userId) {
   }));
 }
 async function create(userId, data) {
+  const [user] = await db.select().from(users).where(eq6(users.id, userId)).limit(1);
+  if (!user) {
+    throw new HTTPException6(404, { message: "User not found" });
+  }
+  if (user.subscriptionTier === "free") {
+    const existingWorkspaces2 = await db.select().from(workspaces).where(eq6(workspaces.ownerId, userId));
+    if (existingWorkspaces2.length >= 1) {
+      throw new HTTPException6(403, {
+        message: "Free tier limited to 1 workspace. Upgrade to create more."
+      });
+    }
+  }
   const existingWorkspaces = await db.select({ slug: workspaces.slug }).from(workspaces);
   const existingSlugs = existingWorkspaces.map((w) => w.slug);
   const slug = generateUniqueSlug(data.name, existingSlugs);
@@ -1699,6 +1714,18 @@ async function create2(workspaceId, userId, data) {
     throw new HTTPException7(403, {
       message: "Access denied to this workspace"
     });
+  }
+  const [user] = await db.select().from(users).where(eq7(users.id, userId)).limit(1);
+  if (!user) {
+    throw new HTTPException7(404, { message: "User not found" });
+  }
+  if (user.subscriptionTier === "free") {
+    const existingProjects2 = await db.select().from(projects).where(eq7(projects.workspaceId, workspaceId));
+    if (existingProjects2.length >= 3) {
+      throw new HTTPException7(403, {
+        message: "Free tier limited to 3 projects per workspace. Upgrade to create more."
+      });
+    }
   }
   const existingProjects = await db.select({ slug: projects.slug }).from(projects).where(eq7(projects.workspaceId, workspaceId));
   const existingSlugs = existingProjects.map((p) => p.slug);
@@ -1961,6 +1988,18 @@ async function createInvitation(workspaceId, inviterUserId, inviteeEmail, role) 
     throw new HTTPException9(403, {
       message: "You do not have permission to invite members to this workspace"
     });
+  }
+  const [owner] = await db.select().from(users).where(eq9(users.id, workspace.ownerId)).limit(1);
+  if (!owner) {
+    throw new HTTPException9(404, { message: "Workspace owner not found" });
+  }
+  if (owner.subscriptionTier === "free") {
+    const existingMembers = await db.select().from(workspaceMembers).where(eq9(workspaceMembers.workspaceId, workspaceId));
+    if (existingMembers.length >= 2) {
+      throw new HTTPException9(403, {
+        message: "Free tier limited to 2 team members. Upgrade to invite more."
+      });
+    }
   }
   const [existingMember] = await db.select({ userId: workspaceMembers.userId }).from(workspaceMembers).innerJoin(users, eq9(workspaceMembers.userId, users.id)).where(
     and9(
@@ -3077,7 +3116,7 @@ async function create3(projectId, userId, data) {
     screenshotAnnotated: screenshotAnnotatedUrl,
     canvasData: data.canvasData || null
   }).returning();
-  fireWebhookAsync(projectId, userId, newAnnotation);
+  await fireWebhookAsync(projectId, userId, newAnnotation);
   return {
     id: newAnnotation.id,
     projectId: newAnnotation.projectId,
@@ -3211,6 +3250,42 @@ async function remove4(annotationId, userId) {
   }
   await db.delete(annotations).where(eq11(annotations.id, annotationId));
 }
+async function resendWebhook(annotationId, userId) {
+  const [annotation] = await db.select().from(annotations).where(eq11(annotations.id, annotationId)).limit(1);
+  if (!annotation) {
+    throw new HTTPException12(404, { message: "Annotation not found" });
+  }
+  const hasAccess = await checkProjectAccess(annotation.projectId, userId);
+  if (!hasAccess) {
+    throw new HTTPException12(403, {
+      message: "Access denied to this annotation"
+    });
+  }
+  const [user] = await db.select({ name: users.name, email: users.email }).from(users).where(eq11(users.id, userId)).limit(1);
+  const [project] = await db.select({ name: projects.name }).from(projects).where(eq11(projects.id, annotation.projectId)).limit(1);
+  if (!user || !project) {
+    throw new HTTPException12(404, { message: "User or project not found" });
+  }
+  await fireWebhookIfEnabled(annotation.projectId, {
+    id: annotation.id,
+    title: annotation.title,
+    description: annotation.description,
+    pageUrl: annotation.pageUrl,
+    pageTitle: annotation.pageTitle,
+    screenshotAnnotated: annotation.screenshotAnnotated,
+    priority: annotation.priority,
+    type: annotation.type,
+    createdBy: {
+      name: user.name || "Unknown",
+      email: user.email
+    },
+    project: {
+      name: project.name
+    },
+    createdAt: annotation.createdAt.toISOString()
+  });
+  return { success: true, message: "Webhook sent successfully" };
+}
 
 // src/routes/projects.ts
 var projectRoutes = new Hono4();
@@ -3287,6 +3362,12 @@ annotationRoutes.delete("/:id", async (c) => {
   const annotationId = c.req.param("id");
   await remove4(annotationId, userId);
   return c.body(null, 204);
+});
+annotationRoutes.post("/:id/resend-webhook", async (c) => {
+  const userId = c.get("userId");
+  const annotationId = c.req.param("id");
+  const result = await resendWebhook(annotationId, userId);
+  return c.json(result);
 });
 
 // src/routes/upload.ts
@@ -3382,7 +3463,7 @@ invitationRoutes.post("/:token/accept", async (c) => {
     const authHeader = c.req.header("Authorization");
     if (authHeader?.startsWith("Bearer ")) {
       const sessionToken = authHeader.substring(7);
-      const { validateSession: validateSession2 } = await import("./auth-Y6E7HJEV.js");
+      const { validateSession: validateSession2 } = await import("./auth-BE6LSCYQ.js");
       const session = await validateSession2(sessionToken);
       if (session) {
         userId = session.userId;
@@ -3410,6 +3491,308 @@ invitationRoutes.post("/:token/decline", async (c) => {
   await declineInvitation(token);
   return c.body(null, 204);
 });
+
+// src/routes/webhooks.ts
+import { Hono as Hono9 } from "hono";
+
+// src/services/lemonsqueezy.ts
+import crypto2 from "crypto";
+import { eq as eq12, and as and10 } from "drizzle-orm";
+var LEMONSQUEEZY_API_KEY = process.env.LEMONSQUEEZY_API_KEY;
+var LEMONSQUEEZY_WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
+var LEMONSQUEEZY_STORE_ID = process.env.LEMONSQUEEZY_STORE_ID;
+var LEMONSQUEEZY_VARIANT_ID = process.env.LEMONSQUEEZY_VARIANT_ID;
+function verifyWebhookSignature(payload, signature) {
+  if (!LEMONSQUEEZY_WEBHOOK_SECRET) {
+    throw new Error("LEMONSQUEEZY_WEBHOOK_SECRET not configured");
+  }
+  const hmac = crypto2.createHmac("sha256", LEMONSQUEEZY_WEBHOOK_SECRET);
+  const digest = hmac.update(payload).digest("hex");
+  return crypto2.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+}
+async function isWebhookProcessed(eventId) {
+  const result = await db.select().from(webhooksProcessed).where(eq12(webhooksProcessed.eventId, eventId)).limit(1);
+  return result.length > 0;
+}
+async function markWebhookProcessed(eventId, eventName) {
+  await db.insert(webhooksProcessed).values({
+    eventId,
+    eventName
+  });
+}
+async function handleLicenseKeyCreated(event) {
+  const { data } = event;
+  const orderId = data.attributes.order_id.toString();
+  const userEmail = data.attributes.user_email;
+  const licenseKey = data.attributes.key;
+  const [user] = await db.select().from(users).where(eq12(users.email, userEmail)).limit(1);
+  if (!user) {
+    console.warn(`User not found for email: ${userEmail}, order: ${orderId}`);
+    return;
+  }
+  await db.transaction(async (tx) => {
+    const [license] = await tx.insert(licenses).values({
+      userId: user.id,
+      licenseKey,
+      lemonsqueezyOrderId: orderId,
+      status: "active",
+      purchasedAt: new Date(data.attributes.created_at)
+    }).returning();
+    const existingSubscription = await tx.select().from(userSubscriptions).where(eq12(userSubscriptions.userId, user.id)).limit(1);
+    if (existingSubscription.length > 0) {
+      await tx.update(userSubscriptions).set({
+        tier: "lifetime",
+        isActive: true,
+        licenseId: license.id,
+        updatedAt: /* @__PURE__ */ new Date()
+      }).where(eq12(userSubscriptions.userId, user.id));
+    } else {
+      await tx.insert(userSubscriptions).values({
+        userId: user.id,
+        tier: "lifetime",
+        isActive: true,
+        licenseId: license.id
+      });
+    }
+    await tx.update(users).set({
+      subscriptionTier: "lifetime",
+      hasLifetimeAccess: true,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq12(users.id, user.id));
+  });
+  console.log(`License activated for user ${user.email}, order ${orderId}`);
+}
+async function handleOrderRefunded(event) {
+  const { data } = event;
+  const orderId = data.id;
+  const [license] = await db.select().from(licenses).where(eq12(licenses.lemonsqueezyOrderId, orderId)).limit(1);
+  if (!license) {
+    console.warn(`License not found for order: ${orderId}`);
+    return;
+  }
+  await db.transaction(async (tx) => {
+    await tx.update(licenses).set({
+      status: "refunded",
+      refundedAt: /* @__PURE__ */ new Date(),
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq12(licenses.id, license.id));
+    await tx.update(userSubscriptions).set({
+      tier: "free",
+      isActive: false,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq12(userSubscriptions.userId, license.userId));
+    await tx.update(users).set({
+      subscriptionTier: "free",
+      hasLifetimeAccess: false,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq12(users.id, license.userId));
+  });
+  console.log(`License refunded for order ${orderId}`);
+}
+async function getUserSubscription(userId) {
+  const [subscription] = await db.select().from(userSubscriptions).where(eq12(userSubscriptions.userId, userId)).limit(1);
+  return subscription || null;
+}
+async function hasLifetimeAccess(userId) {
+  const [user] = await db.select().from(users).where(eq12(users.id, userId)).limit(1);
+  return user?.hasLifetimeAccess || false;
+}
+async function generateCheckoutUrl(email, userId) {
+  if (!LEMONSQUEEZY_API_KEY) {
+    throw new Error("LEMONSQUEEZY_API_KEY not configured");
+  }
+  if (!LEMONSQUEEZY_STORE_ID) {
+    throw new Error("LEMONSQUEEZY_STORE_ID not configured");
+  }
+  if (!LEMONSQUEEZY_VARIANT_ID) {
+    throw new Error("LEMONSQUEEZY_VARIANT_ID not configured");
+  }
+  const customData = {};
+  if (userId) {
+    customData.user_id = userId;
+  }
+  const response = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
+    method: "POST",
+    headers: {
+      Accept: "application/vnd.api+json",
+      "Content-Type": "application/vnd.api+json",
+      Authorization: `Bearer ${LEMONSQUEEZY_API_KEY}`
+    },
+    body: JSON.stringify({
+      data: {
+        type: "checkouts",
+        attributes: {
+          checkout_data: {
+            email,
+            custom: customData
+          }
+        },
+        relationships: {
+          store: {
+            data: {
+              type: "stores",
+              id: LEMONSQUEEZY_STORE_ID
+            }
+          },
+          variant: {
+            data: {
+              type: "variants",
+              id: LEMONSQUEEZY_VARIANT_ID
+            }
+          }
+        }
+      }
+    })
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("LemonSqueezy API error:", errorText);
+    throw new Error(
+      `Failed to create checkout: ${response.status} ${response.statusText}`
+    );
+  }
+  const data = await response.json();
+  const checkoutUrl = data.data.attributes.url;
+  if (!checkoutUrl) {
+    throw new Error("No checkout URL returned from LemonSqueezy API");
+  }
+  return checkoutUrl;
+}
+async function validateLicenseKey(licenseKey, userId) {
+  const [license] = await db.select().from(licenses).where(
+    and10(
+      eq12(licenses.licenseKey, licenseKey),
+      eq12(licenses.userId, userId),
+      eq12(licenses.status, "active")
+    )
+  ).limit(1);
+  return !!license;
+}
+async function getRemainingSlots(totalSlots = 10) {
+  const result = await db.select().from(licenses).where(eq12(licenses.status, "active"));
+  const soldCount = result.length;
+  const remaining = Math.max(0, totalSlots - soldCount);
+  return remaining;
+}
+
+// src/routes/webhooks.ts
+var app = new Hono9();
+app.post("/lemonsqueezy", async (c) => {
+  try {
+    const rawBody = await c.req.text();
+    const signature = c.req.header("x-signature");
+    if (!signature) {
+      return c.json({ error: "Missing signature" }, 400);
+    }
+    const isValid = verifyWebhookSignature(rawBody, signature);
+    if (!isValid) {
+      console.error("Invalid webhook signature");
+      return c.json({ error: "Invalid signature" }, 401);
+    }
+    const event = JSON.parse(rawBody);
+    const eventId = event.data.id;
+    const eventName = event.meta.event_name;
+    const alreadyProcessed = await isWebhookProcessed(eventId);
+    if (alreadyProcessed) {
+      console.log(`Webhook ${eventId} already processed, skipping`);
+      return c.json({ message: "Already processed" }, 200);
+    }
+    switch (eventName) {
+      case "license_key_created":
+        await handleLicenseKeyCreated(event);
+        break;
+      case "order_refunded":
+        await handleOrderRefunded(event);
+        break;
+      default:
+        console.log(`Unhandled webhook event: ${eventName}`);
+    }
+    await markWebhookProcessed(eventId, eventName);
+    return c.json({ message: "Webhook processed successfully" }, 200);
+  } catch (error) {
+    console.error("Webhook processing error:", error);
+    return c.json(
+      {
+        error: "Webhook processing failed",
+        message: error instanceof Error ? error.message : "Unknown error"
+      },
+      500
+    );
+  }
+});
+var webhooks_default = app;
+
+// src/routes/licenses.ts
+import { Hono as Hono10 } from "hono";
+var app2 = new Hono10();
+app2.get("/validate", authMiddleware, async (c) => {
+  try {
+    const userId = c.get("userId");
+    const subscription = await getUserSubscription(userId);
+    const lifetime = await hasLifetimeAccess(userId);
+    return c.json({
+      tier: subscription?.tier || "free",
+      isActive: subscription?.isActive || false,
+      hasLifetimeAccess: lifetime
+    });
+  } catch (error) {
+    console.error("License validation error:", error);
+    return c.json({ error: "Failed to validate license" }, 500);
+  }
+});
+app2.post("/activate", authMiddleware, async (c) => {
+  try {
+    const userId = c.get("userId");
+    const { licenseKey } = await c.req.json();
+    if (!licenseKey) {
+      return c.json({ error: "License key required" }, 400);
+    }
+    const isValid = await validateLicenseKey(licenseKey, userId);
+    if (!isValid) {
+      return c.json({ error: "Invalid license key" }, 400);
+    }
+    return c.json({ message: "License activated successfully" });
+  } catch (error) {
+    console.error("License activation error:", error);
+    return c.json({ error: "Failed to activate license" }, 500);
+  }
+});
+var licenses_default = app2;
+
+// src/routes/checkout.ts
+import { Hono as Hono11 } from "hono";
+import { eq as eq13 } from "drizzle-orm";
+var app3 = new Hono11();
+app3.post("/", authMiddleware, async (c) => {
+  try {
+    const userId = c.get("userId");
+    const [user] = await db.select().from(users).where(eq13(users.id, userId)).limit(1);
+    if (!user) {
+      return c.json({ error: "User not found" }, 404);
+    }
+    const checkoutUrl = await generateCheckoutUrl(user.email, userId);
+    return c.json({ checkoutUrl });
+  } catch (error) {
+    console.error("Checkout URL generation error:", error);
+    return c.json({ error: "Failed to generate checkout URL" }, 500);
+  }
+});
+app3.get("/slots", async (c) => {
+  try {
+    const remaining = await getRemainingSlots(10);
+    const total = 10;
+    const sold = total - remaining;
+    return c.json({
+      total,
+      sold,
+      remaining
+    });
+  } catch (error) {
+    console.error("Failed to get remaining slots:", error);
+    return c.json({ error: "Failed to get remaining slots" }, 500);
+  }
+});
+var checkout_default = app3;
 
 // src/middleware/error-handler.ts
 import { HTTPException as HTTPException14 } from "hono/http-exception";
@@ -3482,9 +3865,9 @@ function errorHandler(err, c) {
 }
 
 // src/index.ts
-var app = new Hono9().basePath("/api");
-app.use("*", logger());
-app.use(
+var app4 = new Hono12().basePath("/api");
+app4.use("*", logger());
+app4.use(
   "*",
   cors({
     origin: (origin, c) => {
@@ -3510,27 +3893,30 @@ app.use(
     exposeHeaders: ["Set-Cookie"]
   })
 );
-app.onError(errorHandler);
-app.get("/", (c) => c.json({ status: "ok", service: "notto-api" }));
-app.route("/auth", authRoutes);
-app.route("/oauth", oauthRoutes);
-app.route("/workspaces", workspaceRoutes);
-app.route("/projects", projectRoutes);
-app.route("/annotations", annotationRoutes);
-app.route("/upload", uploadRoutes);
-app.route("/projects", integrationRoutes);
-app.route("/invitations", invitationRoutes);
-app.notFound(
+app4.onError(errorHandler);
+app4.get("/", (c) => c.json({ status: "ok", service: "notto-api" }));
+app4.route("/auth", authRoutes);
+app4.route("/oauth", oauthRoutes);
+app4.route("/workspaces", workspaceRoutes);
+app4.route("/projects", projectRoutes);
+app4.route("/annotations", annotationRoutes);
+app4.route("/upload", uploadRoutes);
+app4.route("/projects", integrationRoutes);
+app4.route("/invitations", invitationRoutes);
+app4.route("/webhooks", webhooks_default);
+app4.route("/licenses", licenses_default);
+app4.route("/checkout", checkout_default);
+app4.notFound(
   (c) => c.json({ error: { code: "NOT_FOUND", message: "Route not found" } }, 404)
 );
-var handler = handle(app);
+var handler = handle(app4);
 var GET = handler;
 var POST = handler;
 var PATCH = handler;
 var PUT = handler;
 var DELETE = handler;
 var OPTIONS = handler;
-var src_default = app;
+var src_default = app4;
 export {
   DELETE,
   GET,

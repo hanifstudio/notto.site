@@ -17,6 +17,8 @@ var schema_exports = {};
 __export(schema_exports, {
   annotations: () => annotations,
   annotationsRelations: () => annotationsRelations,
+  licenses: () => licenses,
+  licensesRelations: () => licensesRelations,
   magicLinkTokens: () => magicLinkTokens,
   oauthAuthorizationCodes: () => oauthAuthorizationCodes,
   projects: () => projects,
@@ -24,11 +26,14 @@ __export(schema_exports, {
   rateLimitRecords: () => rateLimitRecords,
   sessions: () => sessions,
   sessionsRelations: () => sessionsRelations,
+  userSubscriptions: () => userSubscriptions,
+  userSubscriptionsRelations: () => userSubscriptionsRelations,
   users: () => users,
   usersRelations: () => usersRelations,
   verificationCodes: () => verificationCodes,
   webhookIntegrations: () => webhookIntegrations,
   webhookIntegrationsRelations: () => webhookIntegrationsRelations,
+  webhooksProcessed: () => webhooksProcessed,
   workspaceInvitations: () => workspaceInvitations,
   workspaceInvitationsRelations: () => workspaceInvitationsRelations,
   workspaceMembers: () => workspaceMembers,
@@ -48,17 +53,23 @@ import {
   boolean
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-var users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  email: varchar("email", { length: 255 }).unique().notNull(),
-  passwordHash: varchar("password_hash", { length: 255 }),
-  // Nullable for magic link auth
-  name: varchar("name", { length: 255 }),
-  profilePicture: text("profile_picture"),
-  // URL to profile picture
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()
-});
+var users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: varchar("email", { length: 255 }).unique().notNull(),
+    passwordHash: varchar("password_hash", { length: 255 }),
+    // Nullable for magic link auth
+    name: varchar("name", { length: 255 }),
+    profilePicture: text("profile_picture"),
+    // URL to profile picture
+    subscriptionTier: varchar("subscription_tier", { length: 20 }).default("free").notNull(),
+    hasLifetimeAccess: boolean("has_lifetime_access").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull()
+  },
+  (table) => [index("idx_users_subscription_tier").on(table.subscriptionTier)]
+);
 var magicLinkTokens = pgTable(
   "magic_link_tokens",
   {
@@ -240,11 +251,56 @@ var annotations = pgTable("annotations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
-var usersRelations = relations(users, ({ many }) => ({
+var licenses = pgTable(
+  "licenses",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+    licenseKey: varchar("license_key", { length: 255 }).unique().notNull(),
+    lemonsqueezyOrderId: varchar("lemonsqueezy_order_id", { length: 255 }).unique().notNull(),
+    lemonsqueezySubscriptionId: varchar("lemonsqueezy_subscription_id", {
+      length: 255
+    }),
+    status: varchar("status", { length: 20 }).default("active").notNull(),
+    purchasedAt: timestamp("purchased_at").defaultNow().notNull(),
+    refundedAt: timestamp("refunded_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull()
+  },
+  (table) => [
+    index("idx_licenses_user_id").on(table.userId),
+    index("idx_licenses_license_key").on(table.licenseKey),
+    index("idx_licenses_order_id").on(table.lemonsqueezyOrderId)
+  ]
+);
+var userSubscriptions = pgTable(
+  "user_subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).unique().notNull(),
+    tier: varchar("tier", { length: 20 }).default("free").notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    licenseId: uuid("license_id").references(() => licenses.id, {
+      onDelete: "set null"
+    }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull()
+  },
+  (table) => [index("idx_user_subscriptions_user_id").on(table.userId)]
+);
+var webhooksProcessed = pgTable("webhooks_processed", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  eventId: varchar("event_id", { length: 255 }).unique().notNull(),
+  eventName: varchar("event_name", { length: 100 }).notNull(),
+  processedAt: timestamp("processed_at").defaultNow().notNull()
+});
+var usersRelations = relations(users, ({ one, many }) => ({
   workspaces: many(workspaces),
   workspaceMembers: many(workspaceMembers),
   annotations: many(annotations),
-  sessions: many(sessions)
+  sessions: many(sessions),
+  licenses: many(licenses),
+  subscription: one(userSubscriptions)
 }));
 var sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
@@ -314,6 +370,26 @@ var annotationsRelations = relations(annotations, ({ one }) => ({
     references: [users.id]
   })
 }));
+var licensesRelations = relations(licenses, ({ one }) => ({
+  user: one(users, {
+    fields: [licenses.userId],
+    references: [users.id]
+  }),
+  subscription: one(userSubscriptions)
+}));
+var userSubscriptionsRelations = relations(
+  userSubscriptions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userSubscriptions.userId],
+      references: [users.id]
+    }),
+    license: one(licenses, {
+      fields: [userSubscriptions.licenseId],
+      references: [licenses.id]
+    })
+  })
+);
 
 // ../../packages/shared/src/db/index.ts
 function createDb(databaseUrl) {
@@ -569,6 +645,9 @@ export {
   sessions,
   oauthAuthorizationCodes,
   annotations,
+  licenses,
+  userSubscriptions,
+  webhooksProcessed,
   db,
   generateTokens,
   generateUniqueSlug,

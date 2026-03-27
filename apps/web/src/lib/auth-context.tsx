@@ -9,6 +9,8 @@ interface User {
   name: string | null;
   email: string;
   profilePicture: string | null;
+  subscriptionTier?: "free" | "lifetime";
+  hasLifetimeAccess?: boolean;
 }
 
 interface AuthContextType {
@@ -68,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await verifyMutation.mutateAsync(token);
       return { isNewUser: result.isNewUser };
     },
-    [verifyMutation]
+    [verifyMutation],
   );
 
   const updateMutation = useMutation({
@@ -83,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (data: { name?: string; profilePicture?: string | null }) => {
       await updateMutation.mutateAsync(data);
     },
-    [updateMutation]
+    [updateMutation],
   );
 
   const logout = useCallback(async () => {

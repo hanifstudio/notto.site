@@ -69,6 +69,31 @@ export async function createInvitation(
     });
   }
 
+  // Check subscription tier for member limit
+  const [owner] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, workspace.ownerId))
+    .limit(1);
+
+  if (!owner) {
+    throw new HTTPException(404, { message: "Workspace owner not found" });
+  }
+
+  // Free tier: limit to 2 members (owner + 1 invited member)
+  if (owner.subscriptionTier === "free") {
+    const existingMembers = await db
+      .select()
+      .from(workspaceMembers)
+      .where(eq(workspaceMembers.workspaceId, workspaceId));
+
+    if (existingMembers.length >= 2) {
+      throw new HTTPException(403, {
+        message: "Free tier limited to 2 team members. Upgrade to invite more.",
+      });
+    }
+  }
+
   // Check if email is already a workspace member (Requirement 1.3)
   const [existingMember] = await db
     .select({ userId: workspaceMembers.userId })

@@ -3,6 +3,8 @@ import { FlipWords } from "@/components/ui/flip-words";
 import { useAuth } from "@/lib/auth-context";
 import { DownloadExtensionButton } from "@/components/DownloadExtensionButton";
 import { UmamiAnalytics } from "@/components/UmamiAnalytics";
+import { PricingSection } from "@/components/PricingSection";
+import { FeaturesSection } from "@/components/FeaturesSection";
 
 export default function HomePage() {
   const words = ["Linear", "Jira", "Asana", "ClickUp", "Anywhere"];
@@ -51,7 +53,7 @@ export default function HomePage() {
 
         {/* Hero Text */}
         <div className="text-center max-w-4xl mx-auto mb-10 z-20 relative px-4">
-          <h1 className="text-5xl md:text-7xl tracking-tight text-neutral-900 leading-[0.95] mb-6 font-instrument-serif font-normal">
+          <h1 className="text-5xl sm:text-7xl md:text-8xl tracking-tight text-neutral-900 leading-tight mb-6 font-instrument-serif font-normal">
             Spot bugs. Annotate. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 font-instrument-serif font-normal">
               Push to{" "}
@@ -273,7 +275,7 @@ export default function HomePage() {
               </div>
 
               {/* Right Panel: Issue Creation Form */}
-              <div className="w-64 bg-white border-l border-neutral-200 p-4 flex flex-col z-30 shadow-xl">
+              <div className="hidden md:flex flex-col w-64 bg-white border-l border-neutral-200 p-4 z-30 shadow-xl">
                 <div className="flex items-center gap-2 mb-4 border-b border-neutral-100 pb-3">
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                   <span className="text-xs font-bold uppercase tracking-wide">
@@ -327,6 +329,16 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* Features Section */}
+      <div className="relative z-10">
+        <FeaturesSection />
+      </div>
+
+      {/* Pricing Section */}
+      <div className="relative z-10 bg-white">
+        <PricingSection />
+      </div>
 
       {/* Context Footer */}
       <div className="w-full border-t border-neutral-200 bg-white/80 backdrop-blur z-20">

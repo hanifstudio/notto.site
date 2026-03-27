@@ -10,6 +10,9 @@ import { annotationRoutes } from "./routes/annotations";
 import { uploadRoutes } from "./routes/upload";
 import { integrationRoutes } from "./routes/integrations";
 import { invitationRoutes } from "./routes/invitations";
+import webhookRoutes from "./routes/webhooks";
+import licenseRoutes from "./routes/licenses";
+import checkoutRoutes from "./routes/checkout";
 import { errorHandler } from "./middleware/error-handler";
 
 // Create Hono app with /api base path
@@ -78,6 +81,9 @@ app.route("/annotations", annotationRoutes);
 app.route("/upload", uploadRoutes);
 app.route("/projects", integrationRoutes);
 app.route("/invitations", invitationRoutes);
+app.route("/webhooks", webhookRoutes);
+app.route("/licenses", licenseRoutes);
+app.route("/checkout", checkoutRoutes);
 
 // 404 handler
 app.notFound((c) =>

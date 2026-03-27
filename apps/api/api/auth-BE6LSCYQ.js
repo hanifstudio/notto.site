@@ -10,7 +10,7 @@ import {
   register,
   updateUser,
   validateSession
-} from "./chunk-SWCWKGH4.js";
+} from "./chunk-XIIQX3IC.js";
 export {
   cleanupExpiredSessions,
   createSession,

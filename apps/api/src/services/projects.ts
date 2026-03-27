@@ -1,7 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import { db } from "../db";
-import { projects, workspaces } from "@notto/shared/db";
+import { projects, workspaces, users } from "@notto/shared/db";
 import { checkAccess as checkWorkspaceAccess } from "./workspaces";
 import { generateSlug, generateUniqueSlug } from "../utils/slug";
 import type {
@@ -49,6 +49,32 @@ export async function create(
     throw new HTTPException(403, {
       message: "Access denied to this workspace",
     });
+  }
+
+  // Check subscription tier for project limit
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!user) {
+    throw new HTTPException(404, { message: "User not found" });
+  }
+
+  // Free tier: limit to 3 projects per workspace
+  if (user.subscriptionTier === "free") {
+    const existingProjects = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.workspaceId, workspaceId));
+
+    if (existingProjects.length >= 3) {
+      throw new HTTPException(403, {
+        message:
+          "Free tier limited to 3 projects per workspace. Upgrade to create more.",
+      });
+    }
   }
 
   // Get existing slugs in this workspace
