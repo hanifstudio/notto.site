@@ -1,0 +1,53 @@
+/* Checkout ------------------------------------------------------------- */
+.checkout-page {
+  width: min(600px, calc(100% - 32px));
+  min-height: 620px;
+  margin: 0 auto;
+  padding: 64px 0 72px;
+}
+
+.checkout-icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  color: var(--color-premium-fg);
+  border: 1px solid var(--color-premium-border);
+  border-radius: 999px;
+  background: var(--color-premium-tint);
+}
+
+.checkout-page--verified .checkout-icon { color: var(--color-success-fg); border-color: color-mix(in srgb, var(--color-success) 35%, transparent); background: var(--color-success-tint); }
+.checkout-page--failed .checkout-icon { color: var(--color-danger-fg); border-color: color-mix(in srgb, var(--color-danger) 35%, transparent); background: var(--color-danger-tint); }
+.checkout-page--cancelled .checkout-icon { color: var(--color-fg-muted); border-color: transparent; background: var(--color-surface-hover); box-shadow: 0 1px 8px -2px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner); }
+.checkout-icon svg { width: 22px; }
+
+.checkout-heading { margin: 22px 0 26px; display: grid; gap: 10px; }
+.checkout-heading h1 { margin: 0; font-size: var(--text-h1); font-weight: 300; letter-spacing: -1px; }
+.checkout-heading p { margin: 0; color: var(--color-fg-muted); font-size: var(--text-lg); line-height: 1.5; }
+
+.checkout-details {
+  margin: 0 0 22px;
+  padding-inline: 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-hover);
+  box-shadow: 0 1px 8px -2px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner);
+}
+
+.checkout-details > div {
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: 194px 1fr;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.checkout-details > div:last-child { border-bottom: 0; }
+.checkout-details dt { color: var(--color-fg-subtle); font-size: var(--text-xs); }
+.checkout-details dd { margin: 0; font-size: var(--text-sm); }
+.checkout-page--verifying .checkout-details > div:first-child dd { color: var(--color-warning-fg); }
+
+.checkout-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.checkout-actions > * { min-height: 47px; }
+.checkout-note { margin: 20px 0 0; color: var(--color-fg-subtle); font-size: var(--text-xs); line-height: 1.5; }
+
+.spin-slow { animation: spin 1600ms linear infinite; }

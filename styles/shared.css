@@ -1,0 +1,303 @@
+.primary-button,
+.secondary-button {
+  min-height: 40px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: color 150ms var(--ease-out-quint), background 150ms var(--ease-out-quint), border-color 150ms var(--ease-out-quint), transform 200ms var(--ease-out-quint);
+}
+
+.primary-button {
+  color: var(--color-fg-on-accent);
+  background: var(--color-accent);
+  box-shadow: 0 3px 22px -6px var(--color-accent-border);
+}
+
+.primary-button:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.primary-button:active {
+  background: var(--color-accent-press);
+  transform: translateY(0);
+}
+
+.secondary-button {
+  color: var(--color-fg);
+  background: var(--color-surface-hover);
+  box-shadow: 0 1px 8px -2px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner);
+}
+
+.secondary-button:hover {
+  background: var(--color-surface-active);
+  box-shadow: 0 2px 14px -2px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner);
+}
+
+
+.site-footer {
+  min-height: 116px;
+  padding: 32px var(--gutter);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.site-footer > div {
+  width: min(520px, 60vw);
+  display: grid;
+  gap: 12px;
+}
+
+.site-footer p {
+  margin: 0;
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.site-footer nav {
+  display: flex;
+  gap: 24px;
+}
+
+.site-footer nav a {
+  color: var(--color-fg-muted);
+  font-size: var(--text-xs);
+  transition: color 150ms var(--ease-out-quint);
+}
+
+.site-footer nav a:hover {
+  color: var(--color-fg);
+}
+
+.access-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 28px;
+  overflow: auto;
+  color: var(--color-fg);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 64px -12px var(--color-scrim);
+  animation: dialog-in 250ms var(--ease-out-quint) both;
+}
+
+.access-dialog[data-state="closing"] {
+  animation: dialog-out 200ms var(--ease-out-quint) forwards;
+}
+
+.access-dialog::backdrop {
+  background: var(--color-scrim);
+  backdrop-filter: blur(4px);
+  animation: scrim-in 250ms var(--ease-out-quint) both;
+}
+
+.access-dialog[data-state="closing"]::backdrop {
+  animation: scrim-out 200ms var(--ease-out-quint) forwards;
+}
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+}
+
+@keyframes dialog-out {
+  to { opacity: 0; transform: translateY(10px) scale(0.98); }
+}
+
+@keyframes scrim-in {
+  from { opacity: 0; }
+}
+
+@keyframes scrim-out {
+  to { opacity: 0; }
+}
+
+.dialog-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--color-fg-muted);
+  background: var(--color-inset);
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 4px -1px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner);
+}
+
+.dialog-close:hover {
+  color: var(--color-fg);
+  background: var(--color-surface-hover);
+}
+
+.dialog-close svg {
+  width: 18px;
+}
+
+.dialog-handle {
+  display: none;
+}
+
+.offer-mark {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 20px;
+  display: grid;
+  place-items: center;
+  color: var(--color-premium-fg);
+  background: var(--color-premium-tint);
+  border: 1px solid var(--color-premium-border);
+  border-radius: 999px;
+}
+
+.offer-mark svg {
+  width: 20px;
+}
+
+.dialog-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.dialog-copy .eyebrow {
+  margin: 0;
+  color: var(--color-premium-fg);
+  font-family: var(--font-satoshi-loaded), var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dialog-copy h2 {
+  max-width: 390px;
+  margin: 0;
+  font-size: var(--text-h1);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -1px;
+}
+
+.dialog-copy > p:last-child {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.price-row {
+  margin-block: 24px;
+  padding-block: 18px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  border-block: 1px solid var(--color-border-subtle);
+}
+
+.price-row strong {
+  font-size: var(--text-h3);
+  font-weight: 500;
+}
+
+.price-row span {
+  color: var(--color-fg-subtle);
+  font-family: var(--font-satoshi-loaded), var(--font-sans);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dialog-note {
+  margin: 14px 0 0;
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.toast {
+  position: fixed;
+  z-index: 20;
+  right: 24px;
+  bottom: 24px;
+  width: min(420px, calc(100vw - 32px));
+  padding: 10px 10px 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-surface-active);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px -8px var(--color-scrim);
+  animation: toast-in 250ms var(--ease-out-quint) both;
+}
+
+.toast > svg {
+  width: 16px;
+  flex: none;
+}
+
+.toast--success > svg {
+  color: var(--color-success-fg);
+}
+
+.toast--error > svg {
+  color: var(--color-danger-fg);
+}
+
+.toast > span {
+  flex: 1;
+  display: grid;
+  gap: 1px;
+}
+
+.toast strong {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.toast small {
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+}
+
+.toast button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--color-fg-subtle);
+  background: transparent;
+  border-radius: var(--radius-sm);
+}
+
+.toast button:hover {
+  color: var(--color-fg);
+  background: var(--color-surface-hover);
+}
+
+.toast button svg {
+  width: 15px;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+

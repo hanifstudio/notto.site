@@ -1,0 +1,142 @@
+/* Orbie design tokens — Tailwind CSS v4
+ * Source of truth: orbie .pen document, "Foundations" area.
+ * Import once in app/globals.css:  @import "tailwindcss"; @import "./tokens.css";
+ * Phase one is dark-only: these are the only values, there is no light theme.
+ */
+
+@theme {
+  /* ---- Surfaces ---------------------------------------------------------
+     Elevation comes from surface value + a hairline border first, shadow second. */
+  --color-app:             #090909; /* page canvas */
+  --color-inset:           #0E0E0E; /* wells, inputs, disabled fills */
+  --color-surface:         #131313; /* cards, header, toolbar */
+  --color-surface-hover:   #1B1B1B; /* card hover */
+  --color-surface-active:  #232323; /* selected chip, toast */
+  --color-scrim:           #05050599; /* dialog / sheet backdrop */
+
+  /* ---- Text (contrast ratios measured on --color-app) ---- */
+  --color-fg:              #F2F2EF; /* 16.9:1 */
+  --color-fg-muted:        #A2A8B2; /*  7.6:1 */
+  --color-fg-subtle:       #7C838D; /*  4.8:1 — floor for 12px metadata */
+  --color-fg-on-accent:    #0C0603;
+
+  /* ---- Borders (translucent white so they read on any surface) ---- */
+  --color-border-subtle:   #FFFFFF14; /*  8% — cards */
+  --color-border:          #FFFFFF1F; /* 12% — controls */
+  --color-border-strong:   #FFFFFF38; /* 22% — hover */
+  --color-highlight-inner: #FFFFFF0F; /* 1px inner top light on hover */
+
+  /* ---- Accent: one red-orange, used for primary action, selection, focus, copy confirm ---- */
+  --color-accent:          #F36C20;
+  --color-accent-hover:    #F68C51;
+  --color-accent-press:    #CC500B;
+  --color-accent-fg:       #F7B997; /* accent text on dark */
+  --color-accent-tint:     #F36C201F;
+  --color-accent-border:   #F36C2066;
+  --color-focus:           #F68C51;
+
+  /* ---- Semantic: state only ---- */
+  --color-success:         #35C98A;
+  --color-success-fg:      #6FE3B0;
+  --color-success-tint:    #35C98A1F;
+  --color-warning:         #E8B33C;
+  --color-warning-fg:      #F2CB75;
+  --color-danger:          #E8565C;
+  --color-danger-fg:       #FF8A8F;
+  --color-danger-tint:     #E8565C1F;
+  --color-premium:         #C9A227; /* always paired with the word "Premium" */
+  --color-premium-fg:      #E8C65A;
+  --color-premium-tint:    #C9A2271F;
+  --color-premium-border:  #C9A22759;
+
+  /* ---- Type ---- */
+  /* A single-family system keeps metadata from feeling like a developer dashboard. */
+  --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+
+  --text-display:    2.75rem;  /* 44 / 300 / -1.8px  page + dialog headings */
+  --text-display--line-height: 1.08;
+  --text-h1:         2rem;     /* 32 / 300 / -1.0px */
+  --text-h1--line-height: 1.08;
+  --text-h2:         1.5rem;   /* 24 / 300 / -0.6px */
+  --text-h2--line-height: 1.3;
+  --text-h3:         1.25rem;  /* 20 / 500 / -0.2px */
+  --text-h3--line-height: 1.3;
+  --text-lg:         1.0625rem;/* 17 / 400  lead paragraphs, instructions */
+  --text-base:       0.9375rem;/* 15 / 400  descriptions, legal copy */
+  --text-sm:         0.875rem; /* 14 / 500  buttons, labels, fields — UI floor */
+  --text-xs:         0.75rem;  /* 12 / 400  secondary metadata ONLY */
+
+  /* ---- Spacing: 4px base ---- */
+  --spacing: 0.25rem; /* Tailwind v4 spacing unit → p-4 = 16px, gap-8 = 32px */
+
+  /* ---- Radius ---- */
+  --radius-sm:  8px;  /* badges, inputs */
+  --radius-md:  10px; /* buttons, chips, toasts */
+  --radius-lg:  14px; /* cards, dialogs, toolbar */
+  --radius-xl:  20px; /* bottom sheets */
+  /* pills use rounded-full */
+
+  /* ---- Motion ---- */
+  --ease-out-quint: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@layer base {
+  /* Page gutters: 32px desktop, 16px mobile */
+  :root { --gutter: 1rem; }
+  @media (min-width: 768px) { :root { --gutter: 2rem; } }
+
+  /* One focus treatment everywhere: 2px accent ring, 3px offset on the app canvas */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+    border-radius: var(--radius-md);
+  }
+
+  /* Durations: 150ms colour/border/opacity · 200ms lift, selection, field focus
+   *            250ms dialog, sheet, toast */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      transition-property: opacity, color, background-color, border-color !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ---- Elevation recipes (use these, don't invent new shadows) ----
+   elevation-0  resting card   bg-surface + border-subtle, no shadow
+   elevation-0b resting card,  bg one step brighter on the surface ladder
+                borderless     (inset→surface→surface-hover→surface-active)
+                               + soft resting shadow (0 1px 8px -2px
+                               var(--color-scrim), inset 0 1px 0
+                               var(--color-highlight-inner)), no border at rest.
+                               Bordered surfaces separate from the page with a
+                               hairline; borderless ones must do it with a
+                               brighter fill + shadow instead, since bg-surface
+                               alone reads as ~1.1:1 against bg-app — not
+                               perceivable on its own. This is the default
+                               recipe for card/control edges app-wide now;
+                               named exceptions (a container whose child
+                               already occupies the "next step up," an inset
+                               "well" control, a ghost link with no resting
+                               fill, an element with its own elevation-2/1
+                               shadow already) skip the fill-bump and/or
+                               shadow — see individual component comments.
+                               True structural dividers (header/footer rules,
+                               table grids, row separators) and semantic
+                               status borders (danger/success/premium/accent
+                               state) are NOT part of this recipe — they stay
+                               bordered on purpose.
+   elevation-1  card hover     bg-surface-active + shadow intensifies:
+                               0 2px 14px -2px #00000099,
+                               inset 0 1px 0 var(--color-highlight-inner)
+                               plus translateY(-1px)
+   elevation-2  overlay        0 24px 64px -12px #000000B3 over bg-scrim
+   glow-accent  primary CTA    0 3px 22px -6px #F36C2059 — ONE per view
+
+   Focus on a borderless (elevation-0b) surface: box-shadow ring in
+   --color-focus (2px, no offset) instead of the outline, since these
+   surfaces have no border to swap color on.
+*/

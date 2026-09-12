@@ -1,0 +1,222 @@
+@media (max-width: 1279px) {
+  .template-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .category-fade {
+    position: relative;
+    overflow: hidden;
+  }
+  .category-fade::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 48px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--color-app));
+  }
+  .category-list {
+    padding-right: 40px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .category-list::-webkit-scrollbar { display: none; }
+}
+
+@media (max-width: 1023px) {
+  .masthead-copy { width: 50%; }
+  .offer-card { gap: 12px; }
+  .template-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767px) {
+  .app-shell { border-radius: var(--radius-lg); }
+
+  .site-header { padding-inline: 16px; }
+  .login-link {
+    min-height: 44px;
+    padding-inline: 18px;
+  }
+
+  .masthead {
+    min-height: 0;
+    padding: 20px 16px 24px;
+    display: grid;
+    gap: 12px;
+    border-bottom: 0;
+  }
+
+  .masthead-copy {
+    width: auto;
+    gap: 10px;
+  }
+
+  .masthead h1 {
+    font-size: var(--text-sm);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+
+  .stats { gap: 8px; }
+
+  .offer-card {
+    padding: 0;
+    display: grid;
+    gap: 12px;
+    background: transparent;
+    border: 0;
+  }
+
+  .offer-card > div { display: none; }
+  .offer-card .primary-button {
+    width: 100%;
+    min-height: 48px;
+  }
+  .desktop-offer-label { display: none; }
+  .mobile-offer-label { display: inline; }
+  .offer-card > p {
+    display: block;
+    margin: 0;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+  }
+
+  .directory-controls {
+    padding: 0 16px 16px;
+    gap: 12px;
+  }
+
+  .toolbar {
+    min-height: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+    background: transparent;
+    border: 0;
+  }
+
+  .search-field { height: 44px; }
+
+  .access-filter {
+    width: 100%;
+    padding: 3px;
+  }
+
+  .access-filter button {
+    min-height: 40px;
+    height: 40px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .category-fade {
+    margin-inline: 0;
+  }
+
+  .category-list button {
+    min-height: 40px;
+    height: 40px;
+  }
+
+  .result-summary { margin-top: 0; }
+
+  .results {
+    min-height: 320px;
+    padding: 0 16px 40px;
+  }
+
+  .template-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .card-body { padding: 16px; }
+  .copy-button { height: 44px; }
+
+  .empty-state {
+    margin-top: 4px;
+    padding: 40px 20px;
+  }
+
+  .empty-state .secondary-button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .site-footer {
+    min-height: 0;
+    padding: 32px 16px;
+    display: grid;
+    gap: 24px;
+  }
+
+  .site-footer > div {
+    width: auto;
+    gap: 16px;
+  }
+
+  .site-footer nav {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .site-footer nav a {
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .access-dialog {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - 24px);
+    margin: auto 0 0;
+    padding: 12px 20px 24px;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    animation: sheet-in 250ms var(--ease-out-quint) both;
+  }
+
+  .access-dialog[data-state="closing"] {
+    animation: sheet-out 200ms var(--ease-out-quint) forwards;
+  }
+
+  @keyframes sheet-in {
+    from { transform: translateY(100%); }
+  }
+
+  @keyframes sheet-out {
+    to { transform: translateY(100%); }
+  }
+
+  .dialog-handle {
+    width: 40px;
+    height: 4px;
+    margin: 0 auto 20px;
+    display: block;
+    border-radius: 999px;
+    background: var(--color-border-strong);
+  }
+
+  .dialog-close {
+    top: 22px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .offer-mark { margin-bottom: 16px; }
+  .dialog-copy h2 { font-size: var(--text-h2); }
+  .price-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .dialog-actions { grid-template-columns: 1fr; }
+  .dialog-actions a { min-height: 48px; }
+
+  .toast {
+    right: 16px;
+    bottom: 16px;
+  }
+}

@@ -1,0 +1,242 @@
+/* Template details ----------------------------------------------------- */
+.template-detail {
+  padding: 40px var(--gutter) 36px;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 0.92fr);
+  align-items: start;
+  gap: 40px;
+}
+
+.detail-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--color-inset);
+}
+
+.detail-preview img {
+  object-fit: cover;
+}
+
+.detail-copy {
+  padding-top: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+}
+
+.detail-copy h1 {
+  margin: 24px 0 12px;
+  font-size: var(--text-h1);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -1px;
+}
+
+.detail-description {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--text-lg);
+  line-height: 1.55;
+}
+
+.tag-list {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-list span {
+  padding: 6px 10px;
+  color: var(--color-fg-subtle);
+  background: var(--color-surface);
+  box-shadow: 0 1px 8px -2px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner);
+  border-radius: 999px;
+  font-size: var(--text-xs);
+}
+
+.detail-action {
+  margin-top: 24px;
+  padding-top: 20px;
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.copy-button--detail {
+  height: 48px;
+  color: var(--color-fg-on-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: 0 3px 22px -6px var(--color-accent-border);
+}
+
+.copy-button--detail:hover {
+  color: var(--color-fg-on-accent);
+  border-color: var(--color-accent-hover);
+  background: var(--color-accent-hover);
+}
+
+.copy-button--detail.copy-button--copying {
+  color: var(--color-fg-muted);
+  border-color: var(--color-border-subtle);
+  background: var(--color-inset);
+  box-shadow: none;
+}
+
+.copy-button--detail.copy-button--copied {
+  color: var(--color-success-fg);
+  border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+  background: var(--color-success-tint);
+  box-shadow: none;
+}
+
+.copy-button--detail.copy-button--error {
+  color: var(--color-danger-fg);
+  border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+  background: var(--color-danger-tint);
+  box-shadow: none;
+}
+
+.detail-action p {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.detail-action p svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.access-note {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-hover);
+  box-shadow: 0 1px 8px -2px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner);
+  color: var(--color-fg-muted);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.access-note strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-fg);
+  font-weight: 500;
+}
+
+.access-note p {
+  margin: 0;
+}
+
+.access-note--success {
+  color: var(--color-success-fg);
+  border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+  background: var(--color-success-tint);
+}
+
+.copy-error {
+  margin: 12px 0 0;
+  color: var(--color-danger-fg);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.related-section {
+  padding: 0 var(--gutter) 48px;
+}
+
+.related-section h2 {
+  margin: 0 0 16px;
+  font-size: var(--text-h3);
+  font-weight: 500;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.related-card {
+  min-width: 0;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-hover);
+  box-shadow: 0 1px 8px -2px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner);
+  transition: transform 200ms var(--ease-out-quint), background 150ms var(--ease-out-quint), box-shadow 200ms var(--ease-out-quint);
+}
+
+.related-card:hover {
+  transform: translateY(-1px);
+  background: var(--color-surface-active);
+  box-shadow: 0 2px 14px -2px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner);
+}
+
+.related-thumb {
+  position: relative;
+  width: 104px;
+  aspect-ratio: 16 / 10;
+  flex: none;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-inset);
+}
+
+.related-thumb img { object-fit: cover; }
+
+.related-copy {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 6px;
+}
+
+.related-copy > strong {
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.related-copy > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+}
+
+.related-copy .access-badge {
+  padding-block: 2px;
+}
+
+.related-card > svg {
+  width: 16px;
+  flex: none;
+  color: var(--color-fg-subtle);
+}

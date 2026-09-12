@@ -1,0 +1,14 @@
+/* Focused routes without the global header or footer ------------------ */
+.minimal-shell {
+  min-height: 100dvh;
+  padding: 24px var(--gutter);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--color-app);
+}
+
+.minimal-brand {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}

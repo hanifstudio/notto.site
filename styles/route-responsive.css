@@ -1,0 +1,49 @@
+@media (max-width: 899px) {
+  .template-detail { grid-template-columns: 1fr; }
+  .detail-copy { padding-top: 0; }
+  .related-grid { grid-template-columns: 1fr; }
+  .legal-layout { grid-template-columns: 1fr; gap: 32px; }
+  .legal-nav { position: static; }
+  .legal-nav nav { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .legal-nav a { padding: 7px 11px; flex: none; border-radius: 999px; background: var(--color-surface); box-shadow: 0 1px 8px -2px var(--color-scrim), inset 0 1px 0 var(--color-highlight-inner); }
+}
+
+@media (max-width: 767px) {
+  .header-left { gap: 8px; }
+  .back-link { width: 44px; padding: 0; justify-content: center; font-size: 0; }
+  .back-link svg { width: 16px; height: 16px; }
+  .account-link { min-height: 44px; }
+  .entitled-summary { width: 100%; min-width: 0; }
+
+  .template-detail { padding: 20px 16px 32px; gap: 26px; }
+  .detail-copy h1 { margin-top: 18px; }
+  .detail-description { font-size: var(--text-base); }
+  .related-section { padding: 0 16px 40px; }
+  .related-thumb { width: 96px; }
+
+  .minimal-shell { padding: 16px; }
+  .auth-only-shell .auth-section { min-height: 0; padding: 28px 0 56px; }
+  .auth-section { min-height: 560px; padding: 44px 16px 64px; }
+  .auth-card > .primary-button,
+  .auth-card > .secondary-button { min-height: 48px; }
+
+  .account-page { width: calc(100% - 32px); min-height: 560px; padding: 36px 0 56px; }
+  .account-only-shell .account-page,
+  .checkout-only-shell .checkout-page { width: 100%; }
+  .account-panel-head { align-items: flex-start; }
+  .account-details > div { padding: 12px 0; grid-template-columns: 1fr; gap: 5px; }
+  .account-offer { align-items: stretch; flex-direction: column; }
+  .account-offer button { width: 100%; min-height: 48px; }
+  .account-actions { align-items: stretch; flex-direction: column; }
+  .account-actions button { width: 100%; min-height: 48px; }
+
+  .checkout-page { min-height: 560px; padding: 44px 0 56px; }
+  .checkout-heading p { font-size: var(--text-base); }
+  .checkout-details > div { padding: 12px 0; grid-template-columns: 1fr; gap: 5px; }
+  .checkout-actions { grid-template-columns: 1fr; }
+  .checkout-actions > * { min-height: 48px; }
+
+  .legal-layout { width: calc(100% - 32px); padding: 36px 0 56px; }
+  .legal-document h1 { font-size: var(--text-h1); letter-spacing: -1px; }
+  .legal-intro { font-size: var(--text-base); }
+}

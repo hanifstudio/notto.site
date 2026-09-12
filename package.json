@@ -1,0 +1,44 @@
+{
+  "name": "orbie",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "check:pattern": "node scripts/check-pattern.mjs",
+    "typecheck": "next typegen && tsc --noEmit",
+    "prepare": "git rev-parse --is-inside-work-tree > /dev/null 2>&1 && git config core.hooksPath .githooks || exit 0",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "bash -c 'set -a && source .env.local && set +a && tsx scripts/seed.ts'",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.102.8",
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.2",
+    "lucide-react": "1.45.0",
+    "next": "16.3.5",
+    "next-auth": "^5.0.0-beta.32",
+    "postgres": "^3.4.9",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "solar-icon-set": "^2.0.1",
+    "zod": "^4.6.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.5",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3"
+  }
+}

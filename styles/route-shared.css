@@ -1,0 +1,103 @@
+/* Shared route chrome --------------------------------------------------- */
+.page-shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.page-shell > main {
+  flex: 1;
+}
+
+.header-left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-link,
+.account-link {
+  min-height: 36px;
+  padding-inline: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+  color: var(--color-fg-muted);
+  font-size: var(--text-xs);
+  transition: color 150ms var(--ease-out-quint), background 150ms var(--ease-out-quint);
+}
+
+.back-link:hover,
+.account-link:hover {
+  color: var(--color-fg);
+  background: var(--color-surface-hover);
+}
+
+.back-link svg,
+.account-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+.button--full {
+  width: 100%;
+}
+
+.subtle-button,
+.destructive-button {
+  min-height: 40px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.subtle-button {
+  color: var(--color-fg-muted);
+  background: color-mix(in srgb, var(--color-fg) 4%, transparent);
+}
+
+.destructive-button {
+  color: var(--color-danger-fg);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
+  background: var(--color-danger-tint);
+}
+
+.primary-button svg,
+.secondary-button svg,
+.subtle-button svg,
+.destructive-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.entitled-summary {
+  min-width: 320px;
+  padding: 14px 18px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--color-success-tint);
+}
+
+.entitled-summary strong {
+  color: var(--color-success-fg);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.entitled-summary span {
+  color: var(--color-fg-muted);
+  font-size: var(--text-xs);
+}
+
+.dialog-actions--single {
+  grid-template-columns: 1fr;
+}
