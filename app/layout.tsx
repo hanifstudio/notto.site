@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque } from "next/font/google";
+import Script from "next/script";
 import { Providers } from "@/app/providers";
 import "./globals.css";
 
@@ -38,6 +39,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={bricolageGrotesque.variable}><Providers>{children}</Providers></body>
+      <Script
+        src="https://cloud.umami.is/script.js"
+        data-website-id="d4d9db45-f8af-4f20-951e-b7937c28648d"
+        strategy="afterInteractive"
+      />
     </html>
   );
 }
