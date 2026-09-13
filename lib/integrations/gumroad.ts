@@ -9,22 +9,29 @@
  *    shared secret as a `token` query param, plus an `event` query param naming
  *    which resource_name it was registered for — only Gumroad's registered
  *    callbacks know the secret, and `event` tells the handler which transition
- *    to apply without having to infer it from the (unconfirmed) response shape.
- * 2. Every inbound event is re-fetched server-to-server from
- *    `GET /v2/sales/:id` using GUMROAD_ACCESS_TOKEN before it's trusted, so a
- *    leaked callback URL alone can't forge a completed sale.
+ *    to apply without having to infer it from the response shape.
+ * 2. The `sale_id` from the body is re-fetched server-to-server from
+ *    `GET /v2/sales/:id` using GUMROAD_ACCESS_TOKEN, confirming it's a real
+ *    sale on our account (and getting its authoritative `refunded` state)
+ *    before anything is trusted.
  *
  * Checkout correlation: the pending purchase's `reference` is appended to the
- * product URL as `?reference=<uuid>`. Gumroad echoes back any URL params on a
- * purchase in the ping's `url_params` dictionary, which is how a given sale is
- * matched back to the purchase row `CheckoutService` created (confirmed against
- * the `URLParams map[string]string` field in github.com/maragudk/gumroad's
- * PingRequest struct — a real, working Gumroad API client).
+ * product URL as `?reference=<uuid>`, and Gumroad echoes URL params back in a
+ * ping's `url_params` dictionary (confirmed against the `URLParams
+ * map[string]string` field in github.com/maragudk/gumroad's PingRequest
+ * struct — a real, working Gumroad API client). Verified live against our own
+ * account: `GET /v2/sales` does **not** include `url_params` at all — it's
+ * ping-only — so `reference` must be read from the raw ping body itself
+ * (`url_params[reference]`, Rails' bracket notation for a nested form field),
+ * not re-derived from the API fetch. An earlier draft got this backwards and
+ * silently dropped every reference, which is why first-purchase testing saw
+ * no entitlement — every real ping returned 409 "no reference" once traced
+ * through `vercel logs`.
  *
- * Note: a `disputed` boolean was assumed on the sale object in an earlier draft
- * of this file but doesn't appear in any real Gumroad client library checked
- * (maragudk/gumroad's PingRequest, antiwork/gumroad-cli's sale view/list
- * structs) — dropped in favor of the explicit `event` query param above.
+ * Note: a `disputed` boolean was assumed on the sale object in an earlier
+ * draft too, and also doesn't appear in any real Gumroad client library
+ * checked (maragudk/gumroad's PingRequest, antiwork/gumroad-cli's sale
+ * view/list structs) — dropped in favor of the explicit `event` query param.
  */
 
 export class GumroadNotConfiguredError extends Error {
@@ -81,11 +88,10 @@ export function isGumroadWebhookEvent(value: string | null): value is GumroadWeb
 export interface GumroadSale {
   saleId: string;
   email: string;
-  reference: string | null;
   refunded: boolean;
 }
 
-/** The only trust anchor for an inbound ping — re-fetches the sale straight from Gumroad's API. */
+/** Confirms a sale_id from an inbound ping is real by re-fetching it from Gumroad's API. */
 export async function fetchSale(saleId: string): Promise<GumroadSale> {
   const accessToken = requireEnv("GUMROAD_ACCESS_TOKEN");
   const url = new URL(`${GUMROAD_API_BASE}/sales/${encodeURIComponent(saleId)}`);
@@ -101,7 +107,15 @@ export async function fetchSale(saleId: string): Promise<GumroadSale> {
   return {
     saleId: sale.id,
     email: sale.email,
-    reference: sale.url_params?.reference ?? null,
     refunded: Boolean(sale.refunded),
   };
+}
+
+/**
+ * Extracts the checkout `reference` from a ping's raw form-encoded body.
+ * Gumroad sends nested params in Rails bracket notation, so the field arrives
+ * flattened as the literal key `url_params[reference]` — not a nested object.
+ */
+export function extractReference(params: URLSearchParams): string | null {
+  return params.get("url_params[reference]");
 }
