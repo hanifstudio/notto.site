@@ -29,13 +29,16 @@ export function AccessOffer({
   const [prevOpen, setPrevOpen] = useState(open);
   const [starting, setStarting] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [offerCode, setOfferCode] = useState("");
   const plusCount = usePlusCount(open);
 
   async function startCheckout() {
     setCheckoutError("");
     setStarting(true);
     try {
-      const { checkoutUrl } = await apiPost<{ checkoutUrl: string }>("/api/checkout/session", {});
+      const { checkoutUrl } = await apiPost<{ checkoutUrl: string }>("/api/checkout/session", {
+        offerCode: offerCode.trim() || undefined,
+      });
       window.location.href = checkoutUrl;
     } catch (error) {
       setCheckoutError(
@@ -130,6 +133,16 @@ export function AccessOffer({
 
       {session ? (
         <div className="dialog-actions dialog-actions--single">
+          {/* Trial-period testing aid — no sandbox on Gumroad, this lets a $0
+              discount code purchase be tested end-to-end. Remove once done. */}
+          <input
+            className="offer-code-input"
+            type="text"
+            placeholder="Discount code (testing only)"
+            value={offerCode}
+            onChange={(event) => setOfferCode(event.target.value)}
+            aria-label="Discount code"
+          />
           <button
             className={buttonClass("primary", true)}
             type="button"

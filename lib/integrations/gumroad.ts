@@ -51,7 +51,7 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export function createCheckoutUrl(input: { reference: string; customerEmail: string }): string {
+export function createCheckoutUrl(input: { reference: string; customerEmail: string; offerCode?: string }): string {
   const productUrl = requireEnv("GUMROAD_PRODUCT_URL");
   const url = new URL(productUrl);
   // Skips Gumroad's product landing page and opens the payment form directly
@@ -59,6 +59,9 @@ export function createCheckoutUrl(input: { reference: string; customerEmail: str
   url.searchParams.set("wanted", "true");
   url.searchParams.set("reference", input.reference);
   url.searchParams.set("email", input.customerEmail);
+  // Must be set before `wanted=true` triggers the add-to-cart redirect, or it
+  // won't reach the cart — trial-period testing aid, see route.ts comment.
+  if (input.offerCode) url.searchParams.set("offer_code", input.offerCode);
   return url.toString();
 }
 

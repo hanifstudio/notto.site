@@ -15,10 +15,10 @@ import { ConflictError, UnauthorizedError, ValidationError } from "@/lib/shared/
 
 export class CheckoutService {
   /** Creates a pending purchase row and returns the Gumroad checkout URL to redirect the user to. */
-  static async createCheckoutSession(userId: string, customerEmail: string): Promise<string> {
+  static async createCheckoutSession(userId: string, customerEmail: string, offerCode?: string): Promise<string> {
     const reference = randomUUID();
     await createPendingPurchase({ userId, providerReference: reference });
-    return createCheckoutUrl({ reference, customerEmail });
+    return createCheckoutUrl({ reference, customerEmail, offerCode });
   }
 
   /**
