@@ -1,4 +1,4 @@
-# Orbie
+# Notto
 
 Curated HTML template directory. Copy a complete page, paste it into a coding agent. See `PRD.md` for product scope.
 
@@ -21,7 +21,7 @@ Component → Hook → API Route → Service → Database
 - **API route** (`app/api/**/route.ts`): auth check + input validation only. Calls exactly one service.
 - **Service** (`lib/services/*.service.ts`): business logic + data transformation. Calls the DB layer and integrations — never another service.
 - **Database** (`lib/db/*.ts`): Drizzle queries only. Zero business logic.
-- **Integration** (`lib/integrations/*.ts`): vendor clients (Brevo, Contra) — pure, no DB access.
+- **Integration** (`lib/integrations/*.ts`): vendor clients (Brevo, Gumroad) — pure, no DB access.
 - **Auth adapter** (`lib/auth/*.ts`): NextAuth config + session loading. May import `@/lib/db`, never services or integrations.
 - **Shared** (`lib/shared/*.ts`): typed errors, response envelope. Imports nothing internal.
 
@@ -38,7 +38,7 @@ Responses are typed envelopes: `{ success: true, data }` or `{ success: false, e
 - **New vendor integration** → `lib/integrations/<vendor>.ts`. Pure client, no DB, no services.
 - **New page/layout (server component)** — may call `@/lib/services/*` directly and render server-side. Best for SEO-relevant content (the directory and template detail pages are server-rendered for exactly this reason — see `app/page.tsx`, `app/templates/[slug]/page.tsx`).
 - **New client mutation** (form submit, button action) — call the API route via `lib/client/api-fetch.ts` (`apiFetch`/`apiPost`/`apiPatch`) directly from the component. Don't reach for TanStack Query unless caching genuinely helps (see below).
-- **New TanStack Query hook** — only where client-side caching or repeated reads across components justify it. Today: `useAccount` (entitlement status read in the account page, premium copy gate, and the checkout verification poll).
+- **New TanStack Query hook** — only where client-side caching or repeated reads across components justify it. Today: `useAccount` (entitlement status read in the account page, plus copy gate, and the checkout verification poll).
 
 ## Testing
 
@@ -52,3 +52,13 @@ Read `docs/architecture.md` for system design and `PRD.md` for product scope.
 
 - Commit messages start with a verb: "feat:", "fix:", "refactor:", "docs:".
 - `.env.local` holds real secrets (gitignored); `.env.example` documents every variable with empty values.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

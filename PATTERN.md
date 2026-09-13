@@ -43,7 +43,7 @@ Per route, enforced via regex in `scripts/check-pattern.mjs`:
 - **`service`** — actually calls the imported service in this handler (not a dead import).
 - **`try-catch`** — every handler wrapped in try/catch.
 - **`error-handling`** — catch block calls `console.error()` or `handleApiError()`.
-- **`zod`** — a handler that genuinely reads the body (`request.json()`) validates it with `.safeParse()`. Routes that delegate body parsing entirely to a service (e.g. the Contra webhook) are exempt — validation still happens, just one layer down.
+- **`zod`** — a handler that genuinely reads the body (`request.json()`) validates it with `.safeParse()`. Routes that delegate body parsing entirely to a service (e.g. the Gumroad webhook) are exempt — validation still happens, just one layer down.
 - **`response-shape`** — non-redirect failures return `fail()` or `handleApiError()`.
 - **`envelope`** — non-redirect, non-exempt handlers return through `ok()` or `handleApiError()`.
 - **`no-manual-status`** — no hand-built `NextResponse.json({ ... }, { status })`.
@@ -54,7 +54,7 @@ Redirects (`NextResponse.redirect()`) skip `response-shape` and `envelope`.
 
 Declared in `EXEMPT` at the top of `scripts/check-pattern.mjs`, each with a reason. `"rule"` exempts a rule for every handler in the file; `"rule:METHOD"` (e.g. `"auth:GET"`) exempts only that handler — prefer the scoped form. The checker warns to stderr on a misspelled rule or method name.
 
-Current exemptions (5 entries):
+Current exemptions (6 entries):
 
 ```
 "app/api/auth/[...nextauth]/route.ts": rules: "*"
@@ -71,11 +71,16 @@ Current exemptions (5 entries):
 
 "app/api/templates/[slug]/copy/route.ts": rules: ["auth", "zod"]
   → Public: free templates are copyable without an account; TemplateService
-    enforces the premium gate. No request body is read.
+    enforces the plus gate. No request body is read.
 
-"app/api/webhooks/contra/route.ts": rules: ["auth", "zod"]
-  → Public: authenticated via the Contra signature header, not a user
-    session. Body parsing/validation happens inside CheckoutService.
+"app/api/templates/route.ts": rules: ["auth", "zod"]
+  → Public: the catalog is browsable by anyone, entitlement is only enforced
+    at copy time. Query params, not a request body.
+
+"app/api/webhooks/gumroad/route.ts": rules: ["auth", "zod"]
+  → Public: Gumroad callbacks carry no signature, so auth comes from a
+    shared token query param, not a user session. Body parsing/validation
+    happens inside CheckoutService.
 ```
 
 ## Reference Implementation

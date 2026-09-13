@@ -6,13 +6,13 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div>
         <Wordmark />
-        <p>If Orbie ever shuts down, every template is released open source. No subscription, no lock-in.</p>
+        <p>If Notto ever shuts down, every template is released open source. No subscription, no lock-in.</p>
       </div>
       <nav aria-label="Legal and support">
         <Link href="/terms">Terms</Link>
         <Link href="/privacy">Privacy</Link>
         <Link href="/refunds">Refunds</Link>
-        <a href="mailto:support@orbie.dev">Support</a>
+        <a href="mailto:support@notto.site">Support</a>
       </nav>
     </footer>
   );

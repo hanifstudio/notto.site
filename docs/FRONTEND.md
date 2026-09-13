@@ -19,7 +19,7 @@ Backend is wired up — see the root `CLAUDE.md` and `PATTERN.md` for the full l
 
 ### Template source
 
-UI components call `useTemplateCopy` (`hooks/use-template-copy.ts`), which delegates to `lib/client/template-copy.ts` → `POST /api/templates/[slug]/copy`. The server (`TemplateService`) enforces the premium gate; the client never receives or holds premium HTML it isn't allowed to see.
+UI components call `useTemplateCopy` (`hooks/use-template-copy.ts`), which delegates to `lib/client/template-copy.ts` → `POST /api/templates/[slug]/copy`. The server (`TemplateService`) enforces the plus gate; the client never receives or holds plus HTML it isn't allowed to see.
 
 ### Authentication
 
@@ -27,11 +27,11 @@ UI components call `useTemplateCopy` (`hooks/use-template-copy.ts`), which deleg
 
 ### Payments
 
-`features/access/access-offer.tsx` calls `POST /api/checkout/session` and redirects to the returned Contra URL. Contra's real API isn't wired yet (`lib/integrations/contra.ts` is a scaffold — see its file comment), so this currently surfaces a "checkout isn't available yet" error in the dialog until `CONTRA_API_KEY`/`CONTRA_PRODUCT_ID` are set and the integration is implemented against the real docs.
+`features/access/access-offer.tsx` calls `POST /api/checkout/session` and redirects to the returned Gumroad checkout URL. This surfaces a "checkout isn't available yet" error in the dialog until `GUMROAD_PRODUCT_URL`/`GUMROAD_ACCESS_TOKEN`/`GUMROAD_WEBHOOK_TOKEN` are set — see `lib/integrations/gumroad.ts`.
 
 ### Catalogue
 
-`lib/catalog.ts` now holds only the `TemplateSummary`/`AccessLevel` types and the static `categoryOptions` taxonomy. Template data itself lives in the `templates` table (Neon/Drizzle) behind `TemplateService` — `app/page.tsx` and `app/templates/[slug]/page.tsx` call it directly as server components (SSR, good for SEO). Re-seed or edit via `npm run db:seed` (`scripts/seed.ts`) or `npm run db:studio`.
+`lib/catalog.ts` now holds only the `TemplateSummary`/`AccessLevel` types and the static `categoryOptions` taxonomy. Template data itself lives in the `templates` table (Neon/Drizzle) behind `TemplateService` — `app/page.tsx` and `app/templates/[slug]/page.tsx` call it directly as server components (SSR, good for SEO). The directory and detail page only return rows with `status: "published"` (see `lib/db/templates.ts`); a template sits invisible as `"draft"` until flipped. Ingest sanitized templates via `npm run db:ingest -- <manifest.json>` (`scripts/ingest-templates.ts` — reads `sourceHtml` from disk per manifest entry) or edit directly via `npm run db:studio`.
 
 ### Legal content
 
@@ -43,9 +43,9 @@ These URLs still force non-default states for design review, independent of real
 
 - `/?view=loading`
 - `/?view=error`
-- `/?q=studio&access=premium`
+- `/?q=studio&access=plus`
 - `/account?status=free` / `/account?status=active` / `/account?status=revoked` — overrides `AccountPage`'s `previewStatus` prop, bypassing the real session
 - `/checkout/success?state=verifying` / `?state=verified` / `?state=failed`
 - `/checkout/cancelled`
 
-Real auth is live — register/log in with any email (10+ character password). `npm run db:seed` also leaves no test user; create one via `/register`, or use the local dev account created while smoke-testing this wiring: `test@example.com` / `password1234`.
+Real auth is live — register/log in with any email (10+ character password). No seed script creates a test user; create one via `/register`, or use the local dev account created while smoke-testing this wiring: `test@example.com` / `password1234`.

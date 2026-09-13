@@ -8,21 +8,22 @@ import { MinimalShell } from "@/components/layout/minimal-shell";
 import { Button, buttonClass } from "@/components/ui/button";
 import { AccessOffer } from "@/features/access/access-offer";
 import { type EntitlementStatus, useAuth } from "@/features/auth/auth-provider";
+import { LIFETIME_PRICE } from "@/lib/catalog";
 
 const accountCopy = {
   active: {
     title: "Lifetime All Access",
-    summary: "Every premium template is unlocked on this account.",
+    summary: "Every plus template is unlocked on this account.",
     badge: "Active",
   },
   free: {
     title: "Free account",
-    summary: "You can copy any free template. Premium pages need All Access.",
+    summary: "You can copy any free template. Plus pages need All Access.",
     badge: "Free",
   },
   revoked: {
     title: "All Access ended",
-    summary: "This purchase was refunded on 20 September 2026, so premium templates are locked again. Free templates are unaffected.",
+    summary: "This purchase was refunded on 20 September 2026, so plus templates are locked again. Free templates are unaffected.",
     badge: "Revoked",
   },
 } satisfies Record<EntitlementStatus, { title: string; summary: string; badge: string }>;
@@ -48,9 +49,9 @@ export function AccountPage({ previewStatus }: { previewStatus?: EntitlementStat
   const status = previewStatus ?? auth.session.entitlement;
   const copy = accountCopy[status];
   const purchased = status === "active"
-    ? `${auth.session.purchasedAt ?? "12 September 2026"} · Contra`
+    ? `${auth.session.purchasedAt ?? "12 September 2026"} · Gumroad`
     : status === "revoked"
-      ? "12 September 2026 · Contra · refunded"
+      ? "12 September 2026 · Gumroad · refunded"
       : "—";
 
   return (
@@ -67,19 +68,19 @@ export function AccountPage({ previewStatus }: { previewStatus?: EntitlementStat
           </div>
           <dl className="account-details">
             <div><dt>Email</dt><dd>{auth.session.email}</dd></div>
-            <div><dt>Access</dt><dd>{status === "active" ? "Lifetime All Access · all premium templates" : "Free — 10 templates"}</dd></div>
+            <div><dt>Access</dt><dd>{status === "active" ? "Lifetime All Access · all plus templates" : "Free — 10 templates"}</dd></div>
             <div><dt>Purchased</dt><dd>{purchased}</dd></div>
-            <div><dt>Receipt</dt><dd>{status === "active" ? <a href="https://contra.com" target="_blank" rel="noreferrer">View receipt</a> : status === "revoked" ? <a href="mailto:support@orbie.dev">Contact support</a> : "—"}</dd></div>
+            <div><dt>Receipt</dt><dd>{status === "active" ? <a href="https://gumroad.com/library" target="_blank" rel="noreferrer">View receipt</a> : status === "revoked" ? <a href="mailto:support@notto.site">Contact support</a> : "—"}</dd></div>
           </dl>
         </div>
         {status !== "active" ? (
           <div className="account-offer">
-            <div><strong>Lifetime All Access</strong><p>{status === "revoked" ? "Premium templates are locked again. You can purchase All Access at any time." : "$12 one time unlocks all premium templates, including the ones added later."}</p></div>
-            <Button variant="primary" onClick={() => setOfferOpen(true)}>Get all access — $12</Button>
+            <div><strong>Lifetime All Access</strong><p>{status === "revoked" ? "Plus templates are locked again. You can purchase All Access at any time." : `$${LIFETIME_PRICE} one time unlocks all plus templates, including the ones added later.`}</p></div>
+            <Button variant="primary" onClick={() => setOfferOpen(true)}>{`Get all access — $${LIFETIME_PRICE}`}</Button>
           </div>
         ) : null}
         <div className="account-actions">
-          <p>{status === "revoked" ? "Think this is wrong?" : "Questions about your purchase?"} <a href="mailto:support@orbie.dev">support@orbie.dev</a></p>
+          <p>{status === "revoked" ? "Think this is wrong?" : "Questions about your purchase?"} <a href="mailto:support@notto.site">support@notto.site</a></p>
           <Button onClick={() => { auth.signOut(); router.push("/"); }}>Log out</Button>
         </div>
       </section>

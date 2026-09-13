@@ -21,7 +21,8 @@ const EXEMPT = {
   "app/api/auth/forgot-password/route.ts": { rules: ["auth"], reason: "Public endpoint: must work for a signed-out visitor who forgot their password." },
   "app/api/auth/reset-password/route.ts": { rules: ["auth"], reason: "Public endpoint: authenticated by the single-use reset token, not a session." },
   "app/api/templates/[slug]/copy/route.ts": { rules: ["auth", "zod"], reason: "Public endpoint: free templates are copyable without an account; TemplateService enforces the premium gate. No request body is read." },
-  "app/api/webhooks/contra/route.ts": { rules: ["auth", "zod"], reason: "Public endpoint: authenticated via the Contra signature header, not a user session. Body parsing/validation happens inside CheckoutService." },
+  "app/api/templates/route.ts": { rules: ["auth", "zod"], reason: "Public endpoint: the catalog is browsable by anyone, entitlement is only enforced at copy time. Query params, not a request body." },
+  "app/api/webhooks/gumroad/route.ts": { rules: ["auth", "zod"], reason: "Public endpoint: Gumroad callbacks carry no signature, so auth comes from a shared token query param instead of a user session. Body parsing/validation happens inside CheckoutService." },
 };
 
 const KNOWN_RULES = ["auth", "service", "try-catch", "error-handling", "zod", "response-shape", "envelope", "no-manual-status"];

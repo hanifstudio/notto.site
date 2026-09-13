@@ -3,7 +3,7 @@ import type { LegalDocument } from "@/lib/legal-content";
 
 export function LegalPage({ document }: { document: LegalDocument }) {
   return (
-    <PageShell back={{ label: "Back to Orbie", href: "/" }}>
+    <PageShell back={{ label: "Back to Notto", href: "/" }}>
       <div className="legal-layout">
         <aside className="legal-nav">
           <strong>Contents</strong>
@@ -23,7 +23,7 @@ export function LegalPage({ document }: { document: LegalDocument }) {
               ) : null}
             </section>
           ))}
-          <div className="legal-contact">Questions? <a href="mailto:support@orbie.dev">support@orbie.dev</a></div>
+          <div className="legal-contact">Questions? <a href="mailto:support@notto.site">support@notto.site</a></div>
         </article>
       </div>
     </PageShell>

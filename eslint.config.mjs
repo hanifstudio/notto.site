@@ -105,7 +105,7 @@ const eslintConfig = defineConfig([
     },
   },
 
-  // Integration layer: vendor clients (Brevo, Contra). Pure, no DB, no services.
+  // Integration layer: vendor clients (Brevo, Gumroad). Pure, no DB, no services.
   {
     files: ["lib/integrations/**"],
     rules: {

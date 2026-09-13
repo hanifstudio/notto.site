@@ -1,4 +1,4 @@
-# Orbie — Design Specification
+# Notto — Design Specification
 
 **Status:** Ready for design exploration  
 **Version:** 1.0  
@@ -7,13 +7,13 @@
 
 ## 1. Purpose
 
-Create an implementation-ready responsive product design for Orbie in a single editable `.pen` file. The PRD defines product behavior and technical constraints; this document defines the visual direction, required frames, states, and pen.dev deliverables.
+Create an implementation-ready responsive product design for Notto in a single editable `.pen` file. The PRD defines product behavior and technical constraints; this document defines the visual direction, required frames, states, and pen.dev deliverables.
 
-Orbie is a curated directory of complete HTML pages for people who build with AI coding tools. The product opens directly to the directory. It is not a conventional SaaS marketing site.
+Notto is a curated directory of complete HTML pages for people who build with AI coding tools. The product opens directly to the directory. It is not a conventional SaaS marketing site.
 
 ## 2. Design objective
 
-The interface should make a visitor feel that Orbie has strong visual taste while remaining quiet enough for the template thumbnails to be the main attraction.
+The interface should make a visitor feel that Notto has strong visual taste while remaining quiet enough for the template thumbnails to be the main attraction.
 
 The experience should feel:
 
@@ -40,7 +40,7 @@ Use this file as **visual inspiration only**. If possible, import or inspect it 
 - Restrained cyan-to-blue accents against an otherwise neutral palette.
 - Soft depth created through subtle gradients, inner highlights, and controlled shadows.
 - Compact translucent or glass-like controls where readability remains strong.
-- Satoshi typography, light display weights, and tight headline tracking.
+- Bricolage Grotesque headings and Inter body text, light display weights, and tight headline tracking.
 - Rounded pills for compact navigation and actions.
 - Small, precise metadata labels and status indicators.
 - Refined hover/focus feedback and slight elevation rather than dramatic movement.
@@ -52,17 +52,17 @@ Use this file as **visual inspiration only**. If possible, import or inspect it 
 - Do not let cyan/blue gradients dominate the product or make every element glow.
 - Do not use a moving 3D background behind the template catalog.
 - Do not overuse glassmorphism, blur, oversized rounding, or nested cards.
-- Do not make Orbie resemble a generic AI SaaS landing page.
+- Do not make Notto resemble a generic AI SaaS landing page.
 - Do not allow decorative effects to compete with template thumbnails.
 
-The reference informs the **finish and component treatment**, not Orbie’s information architecture.
+The reference informs the **finish and component treatment**, not Notto’s information architecture.
 
 ## 4. Product principles translated into design
 
 1. **Directory first:** Show the catalog immediately. No full-screen hero, testimonial section, or feature tour.
 2. **Thumbnails lead:** The shell is restrained; template imagery supplies most of the visual variety.
 3. **Copy is primary:** “Copy HTML” must remain obvious on cards and detail pages.
-4. **Premium is clear, not obstructive:** Free and Premium are easy to distinguish without covering thumbnails with large lock overlays.
+4. **Plus is clear, not obstructive:** Free and Plus are easy to distinguish without covering thumbnails with large lock overlays.
 5. **No fabricated social proof:** Do not show likes, views, ratings, fake trending labels, customer logos, or popularity rankings.
 6. **Low friction:** Browsing and copying free templates must never be hidden behind authentication.
 7. **Honest access:** Describe the offer as `$12 one time` and `Lifetime All Access`; never imply a subscription.
@@ -89,7 +89,7 @@ Prefer large neutral areas with small points of color. Avoid a uniformly blue in
 
 ### Typography
 
-- Use **Satoshi** as the implementation typeface across the product.
+- Use **Bricolage Grotesque** for headings and **Inter** for body/UI text as the implementation typefaces across the product.
 - Use tabular numerals and subtle tracking for technical metadata; do not introduce a mono companion.
 - Page and dialog headings may use lighter weights and tight tracking.
 - Product controls and body text should prioritize legibility over fashion.
@@ -177,10 +177,10 @@ Create desktop and mobile frames for:
 
 The default directory must include:
 
-- Orbie wordmark.
+- Notto wordmark.
 - A concise product explanation, integrated compactly rather than presented as a hero.
 - Search control with `Search templates…` placeholder.
-- Access filters: `All`, `Free`, and `Premium`.
+- Access filters: `All`, `Free`, and `Plus`.
 - Horizontally arranged category chips.
 - `Log in` when signed out or `Account` when signed in.
 - Primary `Get all access — $12` action for a user without access.
@@ -192,16 +192,16 @@ Each template card must include:
 - Dominant thumbnail.
 - Title.
 - Primary category.
-- `Free` or `Premium` badge.
+- `Free` or `Plus` badge.
 - Quick `Copy HTML` action.
 
 The entire card opens details; the copy action must be visually and interactively distinct from the card link.
 
-### B. Premium access dialogs
+### B. Plus access dialogs
 
 Create desktop dialog and mobile sheet treatments for:
 
-1. Logged-out user attempting to copy Premium HTML.
+1. Logged-out user attempting to copy Plus HTML.
 2. Logged-in free user viewing the All Access offer.
 3. Checkout-starting/loading state.
 4. Checkout-start failure.
@@ -210,18 +210,18 @@ The offer must clearly communicate:
 
 - `$12 USD`.
 - One-time payment, not a subscription.
-- Lifetime access to all premium templates under the current product assumption.
+- Lifetime access to all plus templates under the current product assumption.
 - Account required before checkout.
 
-Use direct actions such as `Create account`, `Log in`, and `Continue to Contra`. Avoid manipulative urgency, countdowns, fake scarcity, or preselected marketing consent.
+Use direct actions such as `Create account`, `Log in`, and `Continue to Gumroad`. Avoid manipulative urgency, countdowns, fake scarcity, or preselected marketing consent.
 
 ### C. Template details
 
 Create desktop and mobile frames for:
 
 1. Free template.
-2. Premium template — user lacks access.
-3. Premium template — entitled user.
+2. Plus template — user lacks access.
+3. Plus template — entitled user.
 4. Copy in progress.
 5. Copy success.
 6. Copy failure.
@@ -278,19 +278,19 @@ A return redirect alone is not proof of payment. The UI must support a visible v
 
 ### G. Legal page pattern
 
-Create one responsive legal-document template that can be reused for Terms, Privacy, and Refunds. Prioritize reading width, heading hierarchy, table/list styling, and persistent navigation back to Orbie. Full legal copy is not required in the design file.
+Create one responsive legal-document template that can be reused for Terms, Privacy, and Refunds. Prioritize reading width, heading hierarchy, table/list styling, and persistent navigation back to Notto. Full legal copy is not required in the design file.
 
 ## 9. Component inventory
 
 Build reusable pen.dev components and variants for:
 
 - Desktop header and mobile header.
-- Orbie wordmark treatment.
+- Notto wordmark treatment.
 - Search field.
 - Category chip: default, hover, focus, selected, disabled.
-- Segmented access filter: All, Free, Premium.
-- Template card: Free/Premium × default/hover/focus/copying/copied/error.
-- Free and Premium badges.
+- Segmented access filter: All, Free, Plus.
+- Template card: Free/Plus × default/hover/focus/copying/copied/error.
+- Free and Plus badges.
 - Primary, secondary, subtle, destructive, and icon buttons.
 - Dialog and mobile bottom sheet.
 - Form field with default, focus, filled, error, and disabled states.
@@ -322,14 +322,14 @@ Suggested supporting labels:
 Suggested placeholder template names:
 
 - Signal Foundry — AI & SaaS — Free
-- Northline Studio — Agency & Studio — Premium
+- Northline Studio — Agency & Studio — Plus
 - Index/01 — Portfolio — Free
-- Still House — Architecture & Interiors — Premium
-- Mono Supply — E-commerce — Premium
+- Still House — Architecture & Interiors — Plus
+- Mono Supply — E-commerce — Plus
 - Ledger Field — Finance — Free
-- Dune House — Hospitality & Travel — Premium
+- Dune House — Hospitality & Travel — Plus
 - Soft Practice — Wellness — Free
-- Afterdark FM — Entertainment — Premium
+- Afterdark FM — Entertainment — Plus
 - Chromatic Type Lab — Experimental — Free
 
 These names are design placeholders, not an approved launch catalog. Ensure components handle shorter and longer names without breaking.
@@ -339,18 +339,18 @@ These names are design placeholders, not an approved launch catalog. Ensure comp
 - Search and category/access filters may be combined.
 - Selected filter state cannot rely on color alone.
 - A free copy may complete without login.
-- A premium copy checks authentication and entitlement before source is returned.
+- A plus copy checks authentication and entitlement before source is returned.
 - Copy feedback must be clear and suitable for announcement by an accessible live region in implementation.
 - Keep confirmation near the triggering action where possible; a global toast may provide secondary confirmation.
 - Disabled states must remain readable and explain prolonged processing when relevant.
 - Dialogs need a clear title, close action, keyboard-safe focus order, and obvious primary/secondary actions.
 - Preserve the user’s directory context when navigating to login or purchase and returning.
-- Avoid dead-end success pages: provide `Browse premium templates` or `Copy this template` as the next action.
+- Avoid dead-end success pages: provide `Browse plus templates` or `Copy this template` as the next action.
 
 ## 12. Accessibility requirements
 
 - Target WCAG 2.2 AA contrast.
-- Do not rely on badge color alone to communicate Free versus Premium.
+- Do not rely on badge color alone to communicate Free versus Plus.
 - Show strong, consistent keyboard focus rings.
 - Provide visible labels for forms; placeholders are not labels.
 - Ensure dialogs and mobile sheets have clear hierarchy and dismissal controls.
@@ -376,14 +376,14 @@ Do not design:
 
 ## 14. pen.dev file requirements
 
-Deliver one organized `orbie.pen` file with:
+Deliver one organized `notto.pen` file with:
 
 1. A cover/read-me area describing the concept and frame map.
 2. A `Foundations` area containing color, typography, spacing, radius, shadow, and motion variables.
 3. A `Components` area containing named reusable components and variants.
 4. A `Desktop` area containing all required desktop frames.
 5. A `Mobile` area containing all required mobile frames.
-6. A `Flows & Notes` area showing browse-to-copy, premium purchase, and account-recovery flows.
+6. A `Flows & Notes` area showing browse-to-copy, plus purchase, and account-recovery flows.
 
 Use clear layer and component names. Prefer flex layout and reusable variables over fixed-position visual hacks. Keep the design practical to implement in Next.js and Tailwind CSS.
 
@@ -399,7 +399,7 @@ The final design must remain editable in pen.dev and should not be flattened int
 6. Complete the default desktop and mobile directory first.
 7. Expand the chosen system across details, purchase, auth, account, checkout, and legal states.
 8. Audit consistency, contrast, component reuse, overflow, long text, and mobile behavior.
-9. Produce the organized `orbie.pen` deliverable.
+9. Produce the organized `notto.pen` deliverable.
 
 ## 16. Acceptance criteria
 
@@ -407,8 +407,8 @@ The design is ready for implementation when:
 
 - The directory is unmistakably the homepage and appears immediately.
 - Templates remain the strongest visual elements.
-- Free and Premium access are clear on every relevant surface.
-- Free copy, premium gating, purchase, authentication, recovery, and account flows all have designed states.
+- Free and Plus access are clear on every relevant surface.
+- Free copy, plus gating, purchase, authentication, recovery, and account flows all have designed states.
 - Desktop and mobile layouts are complete and coherent.
 - The design draws useful finish from the reference without copying its page structure or becoming generic AI SaaS UI.
 - Components and variables are reusable and named clearly in the `.pen` file.

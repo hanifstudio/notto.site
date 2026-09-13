@@ -1,20 +1,20 @@
 import { ApiClientError, apiPost } from "./api-fetch";
 
-export class PremiumAccessRequiredError extends Error {
+export class PlusAccessRequiredError extends Error {
   constructor() {
     super("Lifetime All Access is required for this template.");
-    this.name = "PremiumAccessRequiredError";
+    this.name = "PlusAccessRequiredError";
   }
 }
 
-/** Calls POST /api/templates/[slug]/copy — the server enforces the premium gate. */
+/** Calls POST /api/templates/[slug]/copy — the server enforces the plus gate. */
 export async function getTemplateSource(slug: string): Promise<string> {
   try {
     const { source } = await apiPost<{ source: string }>(`/api/templates/${slug}/copy`, {});
     return source;
   } catch (error) {
-    if (error instanceof ApiClientError && error.code === "PREMIUM_ACCESS_REQUIRED") {
-      throw new PremiumAccessRequiredError();
+    if (error instanceof ApiClientError && error.code === "PLUS_ACCESS_REQUIRED") {
+      throw new PlusAccessRequiredError();
     }
     throw error;
   }

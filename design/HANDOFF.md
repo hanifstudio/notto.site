@@ -1,6 +1,6 @@
-# Orbie — design handoff for coding agents
+# Notto — design handoff for coding agents
 
-Everything a coding agent needs to build the Orbie UI. The design lives in a pen.dev
+Everything a coding agent needs to build the Notto UI. The design lives in a pen.dev
 document; this folder is its machine-readable export.
 
 **Read `PRD.md` for behaviour, `DESIGN_SPEC.md` for intent, this file for implementation.**
@@ -37,8 +37,8 @@ Next.js (App Router) + Tailwind CSS v4. Dark only — there is no light theme in
 |---|---|---|
 | `/` | `desktop-directory-default.png` · `mobile-directory-default.png` | `html/desktop-directory.html`, `html/mobile-directory.html` |
 | `/` — empty result set | `desktop-directory-no-results.png` | same file (also covers loading + load failure) |
-| `/` — premium copy attempt | `desktop-directory-premium-gate-dialog.png` · `mobile-detail-premium-sheet.png` | `html/components.html` |
-| `/templates/[slug]` | `desktop-detail-free.png` · `desktop-detail-premium-locked.png` | `html/desktop-template-detail.html`, `html/mobile-template-detail.html` |
+| `/` — plus copy attempt | `desktop-directory-plus-gate-dialog.png` · `mobile-detail-plus-sheet.png` | `html/components.html` |
+| `/templates/[slug]` | `desktop-detail-free.png` · `desktop-detail-plus-locked.png` | `html/desktop-template-detail.html`, `html/mobile-template-detail.html` |
 | `/login` `/register` `/forgot-password` `/reset-password` | `desktop-auth-login.png` · `mobile-auth-login.png` | `html/desktop-auth.html`, `html/mobile-auth.html` |
 | `/account` | `desktop-account-all-access.png` · `mobile-account-free.png` | `html/desktop-account-checkout.html` |
 | `/checkout/success` | `desktop-checkout-verified.png` · `desktop-checkout-verifying.png` · `mobile-checkout-verified.png` | same file |
@@ -94,8 +94,8 @@ Each maps to a named component in the .pen file and is rendered in `html/compone
 | `Header` | `variant: 'desktop' \| 'mobile'`, `signedIn`, `back?: {label, href}` | signed out · signed in · detail (back pill shown) |
 | `SearchField` | `value`, `onChange`, `onClear` | default · focus · filled (clear button appears) · disabled |
 | `Chip` | `label`, `selected`, `disabled` | default · hover · **selected (check glyph + 500 weight + strong border)** · focus · disabled |
-| `AccessFilter` | `value: 'all' \| 'free' \| 'premium'` | active segment gets check + cyan tint + cyan border |
-| `Badge` | `tier: 'free' \| 'premium'`, `entitled?` | Free (hollow ring) · Premium (filled gold dot) · Premium Unlocked (green check, "Included in your access") |
+| `AccessFilter` | `value: 'all' \| 'free' \| 'plus'` | active segment gets check + cyan tint + cyan border |
+| `Badge` | `tier: 'free' \| 'plus'`, `entitled?` | Free (hollow ring) · Plus (filled gold dot) · Plus Unlocked (green check, "Included in your access") |
 | `Button` | `variant: 'primary' \| 'secondary' \| 'subtle' \| 'destructive' \| 'icon'`, `icon?`, `loading`, `disabled`, `fullWidth` | default · hover · focus · disabled · loading |
 | `TemplateCard` | `slug`, `title`, `category`, `tier`, `thumbnail`, `entitled`, `copyState` | see §6 |
 | `RelatedCard` | `slug`, `title`, `category`, `tier` | default · hover |
@@ -116,13 +116,13 @@ card and on the detail page.
 idle ──click──▶ copying ──▶ copied  (2.5s, then back to idle)
                     └─────▶ error   (stays until dismissed or retried)
 
-premium + !entitled ──click──▶ open AllAccessOffer (never writes to clipboard)
+plus + !entitled ──click──▶ open AllAccessOffer (never writes to clipboard)
 ```
 
 | State | Button fill | Border | Icon | Label |
 |---|---|---|---|---|
 | idle (free / entitled) | `--color-inset` | `--color-border` | `copy` | `Copy HTML` |
-| idle (premium, locked) | `--color-inset` | `--color-border` | `lock` | `Copy HTML` (card) / `Unlock to copy — $12` (detail) |
+| idle (plus, locked) | `--color-inset` | `--color-border` | `lock` | `Copy HTML` (card) / `Unlock to copy — $12` (detail) |
 | hover | `--color-accent-tint` | `--color-accent-border` | — | accent-coloured |
 | copying | `#FFFFFF0A` | `--color-border-subtle` | `loader-circle` (spin) | `Copying…` |
 | copied | `--color-success-tint` | `#35C98A59` | `check` | `HTML copied` |
@@ -143,7 +143,7 @@ per template, 16:10, served from your CDN or `/public`.
 
 - Consistent aspect ratio everywhere. `object-fit: cover`.
 - `alt` text = the template title plus its category, e.g. `"Northline Studio — Agency & Studio template preview"`.
-- Never overlay a large lock or blur on a premium thumbnail. The badge does that job.
+- Never overlay a large lock or blur on a plus thumbnail. The badge does that job.
 - `desktop-directory-default.png` shows what a realistic spread looks like; use it to
   sanity check that the shell still reads well against light, dark, warm and loud
   thumbnails sitting next to each other.
@@ -161,7 +161,7 @@ per template, 16:10, served from your CDN or `/public`.
 **Accessibility (WCAG 2.2 AA)**
 - Contrast is already solved by the tokens. `--color-fg-subtle` (4.8:1) is the floor —
   do not introduce a dimmer grey.
-- Free vs Premium is never colour alone: label + marker shape. Selected chips and
+- Free vs Plus is never colour alone: label + marker shape. Selected chips and
   filter segments are never colour alone: check glyph + weight + border.
 - One focus treatment everywhere (in `tokens.css`): 2px `--color-focus`, 3px offset.
 - Form labels are always visible. Placeholders are not labels.

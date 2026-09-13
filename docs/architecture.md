@@ -2,7 +2,7 @@
 
 ## Overview
 
-Orbie is a curated HTML template directory: browse templates, copy the full HTML of a free one instantly, or unlock all premium templates with a one-time $12 "Lifetime All Access" purchase. See `PRD.md` for product scope.
+Notto is a curated HTML template directory: browse templates, copy the full HTML of a free one instantly, or unlock all plus templates with a one-time $12 "Lifetime All Access" purchase. See `PRD.md` for product scope.
 
 Single Next.js app (App Router) — no monorepo, no separate client app.
 
@@ -17,14 +17,14 @@ orbie/
 ├── lib/
 │   ├── db/               Drizzle schema + query-only modules
 │   ├── services/          Business logic
-│   ├── integrations/      Vendor clients (Brevo, Contra)
+│   ├── integrations/      Vendor clients (Brevo, Gumroad)
 │   ├── auth/               NextAuth config + session helpers
 │   ├── hooks/               TanStack Query wrappers
 │   ├── client/              Browser-only utilities (api-fetch, clipboard)
 │   ├── shared/              Typed errors, response envelope
 │   └── catalog.ts            UI-facing types (TemplateSummary) + static category taxonomy
 ├── drizzle/               Generated SQL migrations
-├── scripts/               seed.ts, check-pattern.mjs
+├── scripts/               ingest-templates.ts, check-pattern.mjs
 ├── CLAUDE.md              Repo-wide house rules
 ├── PATTERN.md              Enforcement rules (this doc's sibling)
 └── docs/architecture.md    (this file)
@@ -37,7 +37,7 @@ orbie/
 | **Route** | `app/api/**/route.ts` | Auth check, input validation, call one service | `@/lib/services`, `@/lib/auth`, `@/lib/shared` | `@/lib/db`, `@/lib/integrations`, `drizzle-orm`, `postgres` |
 | **Service** | `lib/services/*.service.ts` | Business logic, data transformation, call DB + integrations | `@/lib/db`, `@/lib/integrations`, `@/lib/shared` | other services, `@/lib/auth`, `next/server`, `drizzle-orm`, `postgres` |
 | **Database** | `lib/db/*.ts` | Drizzle queries only | `drizzle-orm`, schema | services, integrations, `next/server` |
-| **Integration** | `lib/integrations/*.ts` | Vendor clients (Brevo, Contra) — pure | vendor SDKs / `fetch`, `node:*`, `@/lib/shared` | services, `@/lib/db`, `next/server` |
+| **Integration** | `lib/integrations/*.ts` | Vendor clients (Brevo, Gumroad) — pure | vendor SDKs / `fetch`, `node:*`, `@/lib/shared` | services, `@/lib/db`, `next/server` |
 | **Auth adapter** | `lib/auth/*.ts` | NextAuth config, session loading, current-user lookup | `@/lib/db`, `@/lib/shared` | services, integrations |
 | **Shared** | `lib/shared/*.ts` | Typed errors, success/failure envelopes | (nothing internal) | everything internal |
 | **Client util** | `lib/client/*.ts` | DOM code, `api-fetch`, presentation formatters | React, DOM, `@/lib/shared` | db, services, integrations |
@@ -48,14 +48,14 @@ Layer boundaries are enforced by eslint `no-restricted-imports` zones (`npm run 
 
 ## Tech Stack
 
-Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind v4, NextAuth v5 (Credentials provider, JWT sessions — email/password only), Drizzle ORM + PostgreSQL (Neon, pooled endpoint at runtime via `postgres(url, { prepare: false })`), TanStack Query v5, Zod, Brevo (transactional email — password reset), Contra (hosted checkout for the $12 one-time purchase — **integration scaffolded, not yet implemented**; see `lib/integrations/contra.ts`).
+Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind v4, NextAuth v5 (Credentials provider, JWT sessions — email/password only), Drizzle ORM + PostgreSQL (Neon, pooled endpoint at runtime via `postgres(url, { prepare: false })`), TanStack Query v5, Zod, Brevo (transactional email — password reset), Gumroad (hosted checkout for the $12 one-time purchase; see `lib/integrations/gumroad.ts`).
 
 ## Data model
 
 - `users` — email + bcrypt password hash. No OAuth, no NextAuth DB adapter (Credentials provider forces JWT sessions, so no `accounts`/`sessions` tables are needed).
 - `password_reset_tokens` — single-use, sha256-hashed, 60-minute expiry.
-- `templates` — slug, title, description, category, tags, `access` (`free`/`premium`), thumbnail, `source_html`, `published_at`. `source_html` is only ever returned by `POST /api/templates/[slug]/copy`, gated by `TemplateService`.
-- `purchases` — one-time $12 purchase per user. `status`: `pending` (checkout session created) → `completed` (Contra webhook confirmed) or `refunded`. "All Access" = does the user have a `completed` purchase.
+- `templates` — slug, title, description, category, tags, `access` (`free`/`plus`), thumbnail, `source_html`, `published_at`. `source_html` is only ever returned by `POST /api/templates/[slug]/copy`, gated by `TemplateService`.
+- `purchases` — one-time $12 purchase per user. `status`: `pending` (checkout session created) → `completed` (Gumroad sale confirmed) or `refunded`. "All Access" = does the user have a `completed` purchase.
 
 ## Auth flow (email + password)
 
@@ -64,14 +64,16 @@ Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind v4, NextAuth 
 - Forgot password: `POST /api/auth/forgot-password` always responds the same way regardless of whether the email is registered (no account-existence leak); sends a reset link via Brevo if it is.
 - Reset password: `POST /api/auth/reset-password` verifies the token, updates the password, client then signs in.
 
-## Checkout flow (Contra, $12 one-time)
+## Checkout flow (Gumroad, $12 one-time)
 
-1. Client calls `POST /api/checkout/session` (authenticated) → `CheckoutService.createCheckoutSession` creates a `pending` purchase row with a random reference, then calls `lib/integrations/contra.ts` to get a checkout URL.
+Contra was evaluated first (see PRD § "Contra integration capability") and ruled out: it exposes no public API, no webhooks, and no export — the transaction dashboard is UI-only. Gumroad was chosen instead: email-only seller signup (no Stripe-style business verification gate), a real `GET /v2/sales/:id` API, and `resource_subscriptions` webhooks for both `sale` and `refund` events.
+
+1. Client calls `POST /api/checkout/session` (authenticated) → `CheckoutService.createCheckoutSession` creates a `pending` purchase row with a random reference, then calls `lib/integrations/gumroad.ts` to build the checkout URL (`GUMROAD_PRODUCT_URL?reference=<uuid>&email=<customerEmail>`).
 2. Client redirects the browser to that URL.
-3. Contra's webhook (`POST /api/webhooks/contra`) calls `CheckoutService.verifyAndApplyWebhook`, which verifies the signature, validates the payload, and flips the purchase to `completed` or `refunded`.
+3. Gumroad's callback (`POST /api/webhooks/gumroad?token=...`) calls `CheckoutService.verifyAndApplyWebhook`. Gumroad's callbacks are **unsigned** and **form-encoded** (not JSON), so authenticity comes from two layers instead of an HMAC check: the `token` query param on the registered callback URL (`GUMROAD_WEBHOOK_TOKEN`), then a mandatory re-fetch of the sale from `GET /v2/sales/:id` before trusting it. The purchase is matched by the `reference` echoed back in the sale's `url_params`, then flipped to `completed` or `refunded` based on the sale's authoritative `refunded` flag.
 4. `/checkout/success` polls `GET /api/account` (via the `useAccount` TanStack Query hook) until `entitlement` becomes `"active"` — no client-side timer fakes activation.
 
-**Not yet implemented:** `lib/integrations/contra.ts`'s `createCheckoutUrl` and `verifyWebhookSignature` are scaffolds that throw until Contra's actual API/webhook docs are reviewed and `CONTRA_API_KEY`/`CONTRA_PRODUCT_ID`/`CONTRA_WEBHOOK_SECRET` are set.
+**One-time external setup (not app code):** the `sale` and `refund` resource subscriptions are registered once per environment via `PUT https://api.gumroad.com/v2/resource_subscriptions` (`access_token`, `resource_name`, `post_url` pointing at `/api/webhooks/gumroad?token=<GUMROAD_WEBHOOK_TOKEN>`) — there's no persistent UI for this, it's a one-off API call per environment.
 
 ## SEO
 

@@ -1,4 +1,4 @@
-import { CheckCircleBold, CopyBold, DangerCircleBold, LockKeyholeBold, RefreshCircleBold } from "solar-icon-set";
+import { CheckCircleBold, CopyBold, DangerCircleBold, RefreshCircleBold } from "solar-icon-set";
 import { cn } from "@/lib/cn";
 
 export type CopyStatus = "idle" | "copying" | "copied" | "error";
@@ -15,7 +15,7 @@ export function CopyButton({
   onClick: () => void;
 }) {
   const labels: Record<CopyStatus, string> = {
-    idle: locked && detailed ? "Unlock to copy — $12" : "Copy HTML",
+    idle: "Copy HTML",
     copying: "Copying…",
     copied: "HTML copied",
     error: detailed ? "Couldn't copy — try again" : "Couldn't copy — retry",
@@ -27,9 +27,7 @@ export function CopyButton({
         ? CheckCircleBold
         : status === "error"
           ? DangerCircleBold
-          : locked
-            ? LockKeyholeBold
-            : CopyBold;
+          : CopyBold;
 
   return (
     <button
@@ -37,7 +35,7 @@ export function CopyButton({
       type="button"
       onClick={onClick}
       disabled={status === "copying"}
-      aria-label={`${labels[status]}${locked && status === "idle" ? ", premium template" : ""}`}
+      aria-label={`${labels[status]}${locked && status === "idle" ? ", plus template" : ""}`}
     >
       <Icon className={status === "copying" ? "spin" : undefined} aria-hidden="true" />
       <span>{labels[status]}</span>

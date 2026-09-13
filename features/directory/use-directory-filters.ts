@@ -1,42 +1,38 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import type { AccessLevel, TemplateSummary } from "@/lib/catalog";
+import { useEffect, useState } from "react";
+import type { AccessFilter } from "@/lib/catalog";
 
-export type AccessFilter = "all" | AccessLevel;
+const SEARCH_DEBOUNCE_MS = 300;
 
-export function useDirectoryFilters(
-  templates: TemplateSummary[],
-  initial: { query: string; access: AccessFilter; category: string },
-) {
+/**
+ * Filter state + URL sync only — filtering itself happens server-side (see
+ * useTemplates). `query` updates instantly for a responsive input; the
+ * debounced value is what drives the URL and the API request, so fast typing
+ * doesn't fire a request per keystroke.
+ */
+export function useDirectoryFilters(initial: { query: string; access: AccessFilter; category: string }) {
   const [query, setQuery] = useState(initial.query);
+  const [debouncedQuery, setDebouncedQuery] = useState(initial.query);
   const [access, setAccess] = useState<AccessFilter>(initial.access);
   const [category, setCategory] = useState(initial.category);
 
   useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(query), SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
     const params = new URLSearchParams();
-    if (query.trim()) params.set("q", query.trim());
+    if (debouncedQuery.trim()) params.set("q", debouncedQuery.trim());
     if (access !== "all") params.set("access", access);
     if (category !== "all") params.set("category", category);
     window.history.replaceState(null, "", params.size ? `?${params}` : window.location.pathname);
-  }, [access, category, query]);
-
-  const filteredTemplates = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase();
-    return templates.filter((template) => {
-      const searchable = [template.title, template.description, template.category, ...template.tags]
-        .join(" ")
-        .toLocaleLowerCase();
-      return (
-        (access === "all" || template.access === access) &&
-        (category === "all" || template.category === category) &&
-        (!needle || searchable.includes(needle))
-      );
-    });
-  }, [access, category, query, templates]);
+  }, [access, category, debouncedQuery]);
 
   function clear() {
     setQuery("");
+    setDebouncedQuery("");
     setAccess("all");
     setCategory("all");
   }
@@ -44,11 +40,11 @@ export function useDirectoryFilters(
   return {
     query,
     setQuery,
+    debouncedQuery,
     access,
     setAccess,
     category,
     setCategory,
-    filteredTemplates,
     filtersActive: Boolean(query.trim() || access !== "all" || category !== "all"),
     clear,
   };

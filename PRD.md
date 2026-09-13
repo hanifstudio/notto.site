@@ -1,30 +1,30 @@
-# Orbie — Product Requirements Document
+# Notto — Product Requirements Document
 
 **Status:** Draft for approval  
 **Version:** 1.0  
 **Date:** 2026-09-12  
-**Owner:** Orbie  
+**Owner:** Notto  
 **Product type:** Curated HTML template directory
 
 ## 1. Executive Summary
 
 ### 1.1 Product vision
 
-Orbie is a curated directory of distinctive, complete HTML pages for people building products with AI coding tools. Users can discover a design, copy the entire HTML file in one action, and paste it into Claude Code, Codex, Cursor, or another coding agent or development harness.
+Notto is a curated directory of distinctive, complete HTML pages for people building products with AI coding tools. Users can discover a design, copy the entire HTML file in one action, and paste it into Claude Code, Codex, Cursor, or another coding agent or development harness.
 
-Orbie exists to counter “AI slop”: the increasingly generic, overly tidy, and repetitive visual style produced by default AI-generated interfaces. It prioritizes opinionated designs that help builders start from a stronger visual direction without locking them into a proprietary editor, framework, or platform.
+Notto exists to counter “AI slop”: the increasingly generic, overly tidy, and repetitive visual style produced by default AI-generated interfaces. It prioritizes opinionated designs that help builders start from a stronger visual direction without locking them into a proprietary editor, framework, or platform.
 
 ### 1.2 Core problem
 
 AI-assisted builders can generate functional websites quickly, but the resulting designs frequently look interchangeable. Existing inspiration galleries often provide screenshots without implementation, while component directories commonly provide isolated sections rather than complete pages. Recreating a distinctive screenshot still requires substantial prompting and iteration.
 
-Orbie closes the gap between inspiration and implementation by providing complete, copyable HTML pages.
+Notto closes the gap between inspiration and implementation by providing complete, copyable HTML pages.
 
 ### 1.3 Value proposition
 
 > Distinctive, complete HTML pages you can copy directly into your favorite coding agent—without another generic AI design.
 
-Orbie differentiates itself through:
+Notto differentiates itself through:
 
 - Complete HTML pages rather than isolated components.
 - Immediate source-code access rather than a proprietary visual builder.
@@ -51,16 +51,16 @@ Orbie differentiates itself through:
 
 - **Free tier:** Ten curated templates available to copy without an account.
 - **All Access:** One-time payment of **$12 USD**.
-- All Access unlocks all premium templates published at launch and, unless revised before launch, future templates added to Orbie.
+- All Access unlocks all plus templates published at launch and, unless revised before launch, future templates added to Notto.
 - No subscription, trial, usage credits, or per-template purchase in phase one.
-- Payments are processed through a hosted Contra product checkout.
+- Payments are processed through a hosted Gumroad product checkout.
 
 ### 1.6 Phase-one scope
 
 Phase one launches with **20 templates**:
 
 - 10 free templates.
-- 10 premium templates.
+- 10 plus templates.
 - A diverse mix of visual styles and use cases.
 - Every template sanitized and manually approved before publication.
 
@@ -70,8 +70,8 @@ The product opens directly to the directory. There is no separate marketing land
 
 - Help a visitor find a distinctive page quickly.
 - Make copying a free template nearly frictionless.
-- Demonstrate enough premium value to support a $12 purchase.
-- Deliver an end-to-end flow from discovery through payment and premium copying.
+- Demonstrate enough plus value to support a $12 purchase.
+- Deliver an end-to-end flow from discovery through payment and plus copying.
 - Establish a safe, repeatable process for publishing the remaining 194 templates in phase two.
 
 ### 1.8 Provisional 90-day success metrics
@@ -110,20 +110,20 @@ These targets are initial planning benchmarks. They should be reviewed after 30 
 | `/forgot-password` | Password-reset request |
 | `/reset-password` | Password reset using a short-lived token |
 | `/account` | Access status, purchase information, and logout |
-| `/checkout/success` | Return state after successful Contra checkout |
-| `/checkout/cancelled` | Return state after an abandoned or cancelled checkout, if Contra supports it |
+| `/checkout/success` | Return state after successful Gumroad checkout |
+| `/checkout/cancelled` | Return state after an abandoned or cancelled checkout, if Gumroad supports it |
 | `/terms` | Terms of service and template license |
 | `/privacy` | Privacy policy |
 | `/refunds` | Refund policy |
 
-Pricing does not require a dedicated page in phase one. It appears in the directory header and in the premium access dialog.
+Pricing does not require a dedicated page in phase one. It appears in the directory header and in the plus access dialog.
 
 ### 2.2 Directory experience
 
 The directory should follow the supplied reference structurally without copying its identity:
 
 - Dark, immersive interface.
-- Compact header with an Orbie wordmark.
+- Compact header with an Notto wordmark.
 - Horizontally scrollable category chips.
 - Dense responsive thumbnail grid.
 - Large imagery with minimal card metadata.
@@ -132,28 +132,28 @@ The directory should follow the supplied reference structurally without copying 
 
 The header includes:
 
-- Orbie wordmark or temporary text logo.
+- Notto wordmark or temporary text logo.
 - Search control.
 - “Free” and “All templates” access filters.
 - Login or Account action.
-- Primary “Get all access — $12” action for users without premium access.
+- Primary “Get all access — $12” action for users without plus access.
 
 Each template card includes:
 
 - Thumbnail.
 - Template title.
 - Primary category.
-- Free or Premium badge.
+- Free or Plus badge.
 - Quick-copy action.
 
 Card behavior:
 
 - Selecting the card opens the template details page.
 - Selecting copy on a free card copies the complete HTML immediately.
-- Selecting copy on a premium card checks authentication and entitlement.
+- Selecting copy on a plus card checks authentication and entitlement.
 - Logged-out users are asked to create an account or log in before purchasing.
 - Logged-in users without access see the $12 All Access offer.
-- Entitled users receive the complete premium HTML.
+- Entitled users receive the complete plus HTML.
 
 ### 2.3 Discovery and filtering
 
@@ -161,7 +161,7 @@ Phase one includes:
 
 - Case-insensitive text search across title, description, category, and tags.
 - Category chips derived from the launch catalog.
-- Access filters: All, Free, and Premium.
+- Access filters: All, Free, and Plus.
 - Newest-first sorting.
 - Clear empty states with a one-click reset.
 - URL query parameters for active search and filters where practical, allowing filtered views to be shared.
@@ -181,7 +181,7 @@ Recommended initial taxonomy:
 
 A template has one primary category and may have multiple tags. Categories should be assigned during curation rather than inferred at request time.
 
-Phase one excludes trending, popularity, view counts, likes, favorites, and collections because Orbie has no reliable behavioral data at launch.
+Phase one excludes trending, popularity, view counts, likes, favorites, and collections because Notto has no reliable behavioral data at launch.
 
 ### 2.4 Template details
 
@@ -191,7 +191,7 @@ The details page includes:
 - Template title.
 - Concise description.
 - Category and tags.
-- Free or Premium access label.
+- Free or Plus access label.
 - “Copy HTML” call to action.
 - Short instruction: paste the copied HTML into a coding agent and describe the desired changes.
 - Related templates selected by category or tags.
@@ -200,12 +200,12 @@ The details page must not:
 
 - Render or execute the template HTML.
 - Expose a live preview URL.
-- Embed the premium source in page markup, React payloads, static assets, or client-side bundles.
+- Embed the plus source in page markup, React payloads, static assets, or client-side bundles.
 - Display a full source-code viewer.
 
 ### 2.5 Copy interaction
 
-Copy is Orbie’s primary activation event.
+Copy is Notto’s primary activation event.
 
 Required behavior:
 
@@ -217,13 +217,13 @@ Required behavior:
 6. If clipboard access fails, the interface explains how to retry; phase one does not provide a file download.
 7. A successful copy event is recorded without storing the copied HTML in analytics.
 
-For free templates, the endpoint permits anonymous access. For premium templates, the endpoint requires an authenticated session with an active lifetime entitlement.
+For free templates, the endpoint permits anonymous access. For plus templates, the endpoint requires an authenticated session with an active lifetime entitlement.
 
-The interface should never claim that source code can be made impossible to redistribute after an entitled user receives it. Orbie provides access control, not DRM.
+The interface should never claim that source code can be made impossible to redistribute after an entitled user receives it. Notto provides access control, not DRM.
 
 ### 2.6 Authentication
 
-Phase one uses Orbie-owned email-and-password authentication backed by Neon.
+Phase one uses Notto-owned email-and-password authentication backed by Neon.
 
 Required capabilities:
 
@@ -238,24 +238,24 @@ Required capabilities:
 
 OAuth, social login, passkeys, teams, and organization accounts are excluded from phase one.
 
-Free templates do not require an account. An account is required before beginning premium checkout so a purchase can be attached to a stable Orbie user.
+Free templates do not require an account. An account is required before beginning plus checkout so a purchase can be attached to a stable Notto user.
 
 ### 2.7 Purchase and entitlement flow
 
 The intended flow is:
 
-1. A user attempts to copy a premium template or selects “Get all access — $12.”
+1. A user attempts to copy a plus template or selects “Get all access — $12.”
 2. If logged out, the user registers or logs in.
-3. Orbie starts or links to a Contra-hosted one-time product checkout.
-4. The user completes the $12 purchase on Contra.
-5. Orbie verifies the completed purchase through a supported Contra callback, webhook, API, or another tamper-resistant provider mechanism.
-6. Orbie records the purchase idempotently.
+3. Notto starts or links to a Gumroad-hosted one-time product checkout.
+4. The user completes the $12 purchase on Gumroad.
+5. Notto verifies the completed purchase through Gumroad's `sale`/`refund` resource-subscription callbacks, cross-checked against `GET /v2/sales/:id` (Gumroad's callbacks carry no signature, so the API re-fetch is the trust anchor, not the callback body alone).
+6. Notto records the purchase idempotently.
 7. A permanent All Access entitlement is granted to the user.
-8. The user returns to Orbie and can copy any premium template.
+8. The user returns to Notto and can copy any plus template.
 
-The browser redirect alone must not be treated as proof of payment. Automated premium provisioning requires verifiable server-to-server purchase data or a provider-issued signed token.
+The browser redirect alone must not be treated as proof of payment. Automated plus provisioning requires verifiable server-to-server purchase data or a provider-issued signed token.
 
-If Contra does not expose a suitable integration, payment verification becomes a launch blocker for a fully automated MVP. A manual activation workflow may be used for private testing but does not satisfy the end-to-end production acceptance criteria.
+Contra was evaluated first and ruled out (see § "Contra integration capability" below): it exposes no public API, no webhooks, and no export, so automated verification isn't possible there at all. Gumroad was selected instead — it has real `GET /v2/sales` and `resource_subscriptions` webhooks for both sale and refund events, with lighter seller onboarding than Stripe/Lemon Squeezy/Polar.sh (which all require Stripe-equivalent business verification).
 
 ### 2.8 Account experience
 
@@ -264,7 +264,7 @@ The account page includes:
 - Account email.
 - Access level: Free or Lifetime All Access.
 - Purchase date and provider reference when available.
-- Link to the Contra receipt or order when available.
+- Link to the Gumroad receipt or order when available.
 - Support contact.
 - Logout action.
 
@@ -274,18 +274,18 @@ There is no billing-management interface because the phase-one product is a one-
 
 Proposed policy:
 
-- A customer may request a refund within seven days of purchase only if the account has not successfully copied a premium template.
-- Once premium source code has been accessed, the purchase is non-refundable except where applicable law requires otherwise.
-- An approved refund revokes the associated premium entitlement.
+- A customer may request a refund within seven days of purchase only if the account has not successfully copied a plus template.
+- Once plus source code has been accessed, the purchase is non-refundable except where applicable law requires otherwise.
+- An approved refund revokes the associated plus entitlement.
 - Refund decisions and entitlement changes must be auditable.
 
-Final wording requires legal review and must be compatible with Contra’s product and refund policies.
+Final wording requires legal review and must be compatible with Gumroad’s product and refund policies.
 
 ### 2.10 Shutdown and open-source pledge
 
-Orbie intends to publish both the application source code and the full template collection if the service permanently shuts down.
+Notto intends to publish both the application source code and the full template collection if the service permanently shuts down.
 
-The public promise should be concise and should not imply that secrets, customer records, payment data, private keys, or third-party-licensed assets will be released. Before publication, Orbie must select licenses that cover the application and templates and confirm that included third-party assets can legally be redistributed under those licenses.
+The public promise should be concise and should not imply that secrets, customer records, payment data, private keys, or third-party-licensed assets will be released. Before publication, Notto must select licenses that cover the application and templates and confirm that included third-party assets can legally be redistributed under those licenses.
 
 ### 2.11 User stories and acceptance criteria
 
@@ -297,7 +297,7 @@ Acceptance criteria:
 
 - The directory is the root page.
 - Published templates appear in a responsive grid.
-- Cards clearly distinguish Free from Premium.
+- Cards clearly distinguish Free from Plus.
 - No login wall appears while browsing.
 
 #### Search and filter
@@ -312,7 +312,7 @@ Acceptance criteria:
 
 #### Copy a free template
 
-**As a visitor, I want to copy a free template without registering so that I can evaluate Orbie immediately.**
+**As a visitor, I want to copy a free template without registering so that I can evaluate Notto immediately.**
 
 Acceptance criteria:
 
@@ -323,7 +323,7 @@ Acceptance criteria:
 
 #### Purchase All Access
 
-**As a registered user, I want to pay once so that I can access every premium template permanently.**
+**As a registered user, I want to pay once so that I can access every plus template permanently.**
 
 Acceptance criteria:
 
@@ -332,15 +332,15 @@ Acceptance criteria:
 - Access is granted only after verified payment.
 - Repeated payment notifications do not create duplicate purchases or entitlements.
 
-#### Copy a premium template
+#### Copy a plus template
 
-**As an entitled customer, I want to copy premium HTML as easily as free HTML.**
+**As an entitled customer, I want to copy plus HTML as easily as free HTML.**
 
 Acceptance criteria:
 
-- Premium source is returned only after a server-side session and entitlement check.
+- Plus source is returned only after a server-side session and entitlement check.
 - Copy completes without revealing unrelated templates.
-- Successful premium access is recorded for refund-policy enforcement and product analytics.
+- Successful plus access is recorded for refund-policy enforcement and product analytics.
 
 #### Recover an account
 
@@ -361,7 +361,7 @@ Phase one does not include:
 - A browser code editor or full source viewer.
 - Downloadable files or ZIP archives.
 - Individual page sections or component-level copying.
-- AI template customization inside Orbie.
+- AI template customization inside Notto.
 - Framework-specific React, Vue, or Svelte versions.
 - Favorites, likes, view counts, trending, or collections.
 - User comments, ratings, uploads, or creator profiles.
@@ -379,8 +379,8 @@ Phase one does not include:
 - **UI:** Tailwind CSS and accessible custom components.
 - **Hosting:** Vercel or an equivalent Node-compatible platform.
 - **Database:** Neon Postgres.
-- **Authentication:** Orbie-owned credential and session system using audited cryptographic libraries.
-- **Payments:** Contra hosted one-time product checkout, behind a payment-provider adapter.
+- **Authentication:** Notto-owned credential and session system using audited cryptographic libraries.
+- **Payments:** Gumroad hosted one-time product checkout, behind a payment-provider adapter.
 - **Template source:** Private object storage or another server-only content store; never a public application asset.
 - **Thumbnails:** Public CDN/object storage with responsive image sizes.
 - **Email:** Transactional provider for password-reset messages; provider remains to be selected.
@@ -420,7 +420,7 @@ Phase one does not include:
 - `primary_category`.
 - `tags` — structured array or related table.
 - `thumbnail_url`.
-- `access_level` — `free` or `premium`.
+- `access_level` — `free` or `plus`.
 - `status` — `draft`, `sanitized`, `reviewed`, `published`, or `archived`.
 - `source_storage_key` — server-only object identifier.
 - `source_checksum` — used for integrity and version verification.
@@ -430,7 +430,7 @@ Phase one does not include:
 
 - `id` — UUID primary key.
 - `user_id` — foreign key.
-- `provider` — initially `contra`.
+- `provider` — initially `gumroad`.
 - `external_purchase_id` — unique when provided.
 - `purchaser_email`.
 - `amount_minor` — expected value `1200`.
@@ -483,16 +483,16 @@ Indicative interfaces:
 - `POST /api/auth/logout`.
 - `POST /api/auth/forgot-password`.
 - `POST /api/auth/reset-password`.
-- `POST /api/checkout` — creates or returns the appropriate Contra checkout destination when supported.
-- `POST /api/payments/contra` — verified provider callback/webhook when supported.
+- `POST /api/checkout/session` — creates or returns the appropriate Gumroad checkout destination when supported.
+- `POST /api/webhooks/gumroad` — verified provider callback/webhook when supported.
 - `GET /api/account` — account and entitlement status.
 
 Sensitive operations must validate input, enforce rate limits, use same-origin protections, and return minimal data.
 
-### 3.4 Premium-source protection
+### 3.4 Plus-source protection
 
-- Premium HTML must not exist under `public/`.
-- Premium HTML must not be imported into client components.
+- Plus HTML must not exist under `public/`.
+- Plus HTML must not be imported into client components.
 - Metadata queries must never select or serialize source content.
 - The copy endpoint retrieves one requested object only after authorization.
 - Private source objects use unguessable storage keys and server credentials.
@@ -514,7 +514,7 @@ The existing source collection contains 214 HTML files and associated metadata. 
 4. Remove known Aura referral injection, Google Analytics identifiers, and unrelated tracking code.
 5. Remove or neutralize forms, links, or scripts that transmit visitor information to third parties unless essential and explicitly approved.
 6. Preserve design dependencies such as Tailwind CDN, Iconify, GSAP, and fonts only when required.
-7. Move critical images to Orbie-controlled storage where licensing permits.
+7. Move critical images to Notto-controlled storage where licensing permits.
 8. Format only when doing so does not change behavior.
 9. Validate that the HTML parses and that all expected assets load.
 10. Render at desktop and mobile sizes in an isolated browser.
@@ -564,21 +564,21 @@ Selection criteria:
 - Variety across categories and customer use cases.
 - No unresolved asset-licensing concern.
 
-The free group should be genuinely useful and representative of quality. Premium should offer equal or greater quality, not merely additional quantity.
+The free group should be genuinely useful and representative of quality. Plus should offer equal or greater quality, not merely additional quantity.
 
 ### 3.7 Payment integrity
 
-Before granting access, Orbie must verify:
+Before granting access, Notto must verify:
 
 - Provider authenticity.
 - Unique external purchase or event identity.
 - Successful/paid status.
-- Product identity matches Orbie All Access.
+- Product identity matches Notto All Access.
 - Amount is $12.00 unless an approved discount is introduced.
 - Currency is USD.
-- Purchase maps to the authenticated Orbie account through signed metadata, a verified email, or another provider-supported mechanism.
+- Purchase maps to the authenticated Notto account through signed metadata, a verified email, or another provider-supported mechanism.
 
-Payment event handling must be idempotent. Refund or dispute events revoke access when Contra exposes them; otherwise an auditable operator procedure is required.
+Payment event handling must be idempotent. Gumroad exposes refund and dispute events via `resource_subscriptions`; both revoke access automatically (a dispute is treated the same as a refund conservatively, since the schema has no separate disputed state).
 
 Provider-specific logic must remain behind an adapter so a future migration does not require changes to directory or entitlement code.
 
@@ -606,7 +606,7 @@ Provider-specific logic must remain behind an adapter so a future migration does
 - Category chips and dialogs expose correct accessible names and states.
 - Copy feedback is announced through a non-disruptive live region.
 - Thumbnails have meaningful alternative text.
-- Reduced-motion preferences are respected in the Orbie interface.
+- Reduced-motion preferences are respected in the Notto interface.
 
 ### 3.10 Performance requirements
 
@@ -626,10 +626,10 @@ Required product events:
 - Category/access filter selected.
 - Template details viewed.
 - Free copy attempted and completed.
-- Premium copy denied for missing login or entitlement.
+- Plus copy denied for missing login or entitlement.
 - Checkout started.
 - Purchase verified.
-- Premium copy completed.
+- Plus copy completed.
 - Refund requested and approved.
 
 Operational monitoring includes:
@@ -638,23 +638,23 @@ Operational monitoring includes:
 - Copy endpoint errors and latency.
 - Payment verification failures.
 - Broken thumbnail and dependency reports.
-- Unexpected premium-source access denials.
+- Unexpected plus-source access denials.
 
 Analytics must not store template source, passwords, reset tokens, session tokens, or full payment payloads.
 
 ### 3.12 Launch acceptance criteria
 
-Orbie is ready for public phase-one launch when:
+Notto is ready for public phase-one launch when:
 
-- Twenty approved templates are published: ten Free and ten Premium.
+- Twenty approved templates are published: ten Free and ten Plus.
 - The directory, search, filters, details, and responsive layouts pass browser testing.
 - Anonymous free copying works end to end.
 - Registration, login, logout, and password reset work end to end.
-- A real or provider-sandbox Contra purchase can be verified automatically and grants lifetime access.
-- An entitled user can copy every premium launch template.
-- A non-entitled user cannot retrieve premium HTML through documented or obvious public routes.
+- A real or provider-sandbox Gumroad purchase can be verified automatically and grants lifetime access.
+- An entitled user can copy every plus launch template.
+- A non-entitled user cannot retrieve plus HTML through documented or obvious public routes.
 - Duplicate payment notifications do not grant duplicate or inconsistent access.
-- Refund handling and entitlement revocation are tested to the extent supported by Contra.
+- Refund handling and entitlement revocation are tested to the extent supported by Gumroad.
 - Terms, privacy, refund policy, and template license are published.
 - Core metrics and error monitoring are active.
 - No published template contains known Aura referral or analytics code.
@@ -664,15 +664,19 @@ Orbie is ready for public phase-one launch when:
 
 ### 4.1 Primary risks
 
-#### Contra integration capability
+#### Contra integration capability — resolved, switched to Gumroad
 
-**Risk:** Contra may support hosted product sales without exposing the webhook, API, signed callback, customer metadata, or refund events required for automatic Orbie entitlements.
+**Risk (as written pre-spike):** Contra may support hosted product sales without exposing the webhook, API, signed callback, customer metadata, or refund events required for automatic Notto entitlements.
 
-**Impact:** Payment could succeed while Orbie cannot securely and automatically grant access.
+**Outcome of the phase-zero spike:** Confirmed against Contra's own help center — Contra exposes **no public API, no webhooks, no Zapier/Make integration, and no export**; the transaction dashboard is UI-only. Its "Digital Products" and "Payment Links" features land buyers on Contra's own success screen with no configurable redirect and no signed callback, so automated verification isn't possible on Contra at all, not even partially.
 
-**Mitigation:** Treat a technical Contra checkout spike as phase zero. Confirm purchase verification before building provider-specific production logic. Keep payment logic behind an adapter. Do not trust success-page redirects alone.
+Lemon Squeezy and Polar.sh were considered as alternatives but both now require Stripe-equivalent business/KYC verification (Lemon Squeezy: 1–4+ week payout verification since its 2024 Stripe acquisition; Polar.sh: built on Stripe Connect Express, up to 14-day account review) — the exact friction this PRD's audience wants to avoid.
 
-#### Premium source redistribution
+**Decision:** Switched to **Gumroad**. Email-only seller signup (selling starts immediately; identity verification only gates payout), a real `GET /v2/sales/:id` API, and `resource_subscriptions` webhooks for `sale` and `refund` events (form-encoded, unsigned — verified server-to-server against the API rather than via signature). See `docs/architecture.md` § "Checkout flow (Gumroad, $12 one-time)" and `lib/integrations/gumroad.ts`.
+
+**Mitigation carried forward:** Payment logic stays behind the `lib/integrations/*` adapter so a future provider change doesn't touch directory or entitlement code. Do not trust success-page redirects alone — every purchase is confirmed via Gumroad's API before granting access.
+
+#### Plus source redistribution
 
 **Risk:** A legitimate buyer can save and redistribute HTML after copying it.
 
@@ -690,7 +694,7 @@ Orbie is ready for public phase-one launch when:
 
 #### Licensing ambiguity
 
-**Risk:** Orbie may own the HTML while individual images, fonts, libraries, or brand assets have separate terms.
+**Risk:** Notto may own the HTML while individual images, fonts, libraries, or brand assets have separate terms.
 
 **Impact:** Legal complaints or inability to honor the shutdown open-source pledge.
 
@@ -704,13 +708,13 @@ Orbie is ready for public phase-one launch when:
 
 **Mitigation:** Use audited cryptographic/session libraries, keep the feature set narrow, conduct security testing, and avoid inventing cryptographic primitives.
 
-#### Low perceived premium value at launch
+#### Low perceived plus value at launch
 
-**Risk:** Ten premium templates may feel insufficient even at $12.
+**Risk:** Ten plus templates may feel insufficient even at $12.
 
 **Impact:** Weak conversion.
 
-**Mitigation:** Select premium templates for exceptional variety and quality, clearly include future additions in All Access if approved, and publish phase-two additions consistently.
+**Mitigation:** Select plus templates for exceptional variety and quality, clearly include future additions in All Access if approved, and publish phase-two additions consistently.
 
 #### $12 lifetime sustainability
 
@@ -722,9 +726,9 @@ Orbie is ready for public phase-one launch when:
 
 ### 4.2 Phase 0 — Feasibility and content preparation
 
-- Confirm Contra’s automated purchase-verification options.
-- Confirm how a Contra purchase maps to an Orbie user.
-- Confirm refund/dispute event availability.
+- ~~Confirm Contra's automated purchase-verification options.~~ Done — Contra has none; switched to Gumroad (see § "Contra integration capability").
+- Confirm how a Gumroad purchase maps to a Notto user — via the `reference` query param echoed back in `url_params`, not email alone.
+- ~~Confirm refund/dispute event availability.~~ Done — Gumroad's `resource_subscriptions` supports both.
 - Choose private source and public thumbnail storage.
 - Choose transactional email provider.
 - Select the 20-template launch catalog.
@@ -740,9 +744,9 @@ Orbie is ready for public phase-one launch when:
 - Add template details and related templates.
 - Implement anonymous free copying.
 - Implement Neon-backed registration, sessions, and password reset.
-- Implement Contra one-time checkout and verified lifetime entitlement.
-- Implement premium copying and account status.
-- Publish 10 free and 10 premium sanitized templates.
+- Implement Gumroad one-time checkout and verified lifetime entitlement.
+- Implement plus copying and account status.
+- Publish 10 free and 10 plus sanitized templates.
 - Add legal pages, analytics, monitoring, and production hardening.
 
 **Exit condition:** All launch acceptance criteria pass.
@@ -772,18 +776,18 @@ These features require demonstrated customer demand and are not commitments.
 
 The following do not block approval of the product concept, but phase-zero items must be resolved before public launch:
 
-1. **Contra verification:** Which exact API, webhook, signed callback, or purchase-verification mechanism does Contra provide for products?
-2. **Account mapping:** Can Orbie attach its internal user ID to Contra checkout, or must access be reconciled through a verified matching email?
-3. **Checkout returns:** Does Contra support configurable success and cancellation URLs?
-4. **Refund events:** Can Orbie receive automatic refund and dispute notifications from Contra?
-5. **All Access scope:** Does the $12 purchase contractually include every future Orbie template, or only the collection available at purchase? The current PRD assumes future templates are included.
+1. ~~**Contra verification:**~~ Resolved — Contra provides none of these (no API, no webhook, no export). Switched to Gumroad, which provides `GET /v2/sales/:id` plus `resource_subscriptions` webhooks.
+2. **Account mapping:** Resolved — Notto attaches its internal `reference` (a random UUID) to the Gumroad checkout URL as a query param, which Gumroad echoes back in the sale's `url_params`; not reconciled by email alone.
+3. **Checkout returns:** Gumroad's default post-purchase experience is its own success screen (product access + email receipt); whether a custom cancel/return URL can be configured for `/checkout/cancelled` is still unconfirmed and not blocking (the happy path doesn't depend on it).
+4. ~~**Refund events:**~~ Resolved — yes, via the `refund` (and `dispute`) `resource_subscriptions` webhook.
+5. **All Access scope:** Does the $12 purchase contractually include every future Notto template, or only the collection available at purchase? The current PRD assumes future templates are included.
 6. **Commercial license:** May customers use templates in unlimited personal and commercial projects, including client work? May they resell an end product but not redistribute the template source as a template?
 7. **Open-source licenses:** Which licenses will apply to the application and templates after shutdown, and how will incompatible third-party assets be excluded or replaced?
 8. **Shutdown definition:** What objective event triggers the open-source release, and who can perform the release if the founder is unavailable?
 9. **Storage provider:** Which private object store will hold HTML and which public CDN will hold thumbnails?
 10. **Email provider:** Which service will send password-reset and security messages?
 11. **Email verification:** Is email verification required before checkout, or is verified payment identity sufficient?
-12. **Analytics provider:** Should Orbie use a privacy-focused hosted product or store only first-party events in Neon?
+12. **Analytics provider:** Should Notto use a privacy-focused hosted product or store only first-party events in Neon?
 13. **Legal identity:** What business/person name and jurisdiction should appear in Terms and Privacy?
-14. **Support address and domain:** Replace `support@orbie.dev` and development URLs after a domain is acquired; ownership of `orbie.dev` is not assumed.
-15. **Launch catalog:** Final approval is required for the curated 10 Free and 10 Premium templates before sanitization begins.
+14. **Support address and domain:** Replace `support@notto.site` and development URLs after a domain is acquired; ownership of `notto.site` is not assumed.
+15. **Launch catalog:** Final approval is required for the curated 10 Free and 10 Plus templates before sanitization begins.

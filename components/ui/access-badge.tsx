@@ -9,7 +9,7 @@ export function AccessBadge({
   access: AccessLevel;
   entitled?: boolean;
 }) {
-  if (access === "premium" && entitled) {
+  if (access === "plus" && entitled) {
     return (
       <span className="access-badge access-badge--entitled">
         <Check aria-hidden="true" />
@@ -20,8 +20,7 @@ export function AccessBadge({
 
   return (
     <span className={cn("access-badge", `access-badge--${access}`)}>
-      <span className="badge-marker" aria-hidden="true" />
-      {access === "free" ? "Free" : "Premium"}
+      {access === "free" ? "Free" : "Plus"}
     </span>
   );
 }

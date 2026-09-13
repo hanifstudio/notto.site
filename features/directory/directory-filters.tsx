@@ -1,6 +1,5 @@
 import { Check, Search, X } from "lucide-react";
-import { categoryOptions } from "@/lib/catalog";
-import type { AccessFilter } from "@/features/directory/use-directory-filters";
+import { categoryOptions, type AccessFilter } from "@/lib/catalog";
 
 export function DirectoryFilters({
   query,
@@ -40,7 +39,7 @@ export function DirectoryFilters({
           ) : null}
         </label>
         <div className="access-filter" role="group" aria-label="Filter by access">
-          {(["all", "free", "premium"] as const).map((item) => {
+          {(["all", "free", "plus"] as const).map((item) => {
             const selected = access === item;
             return (
               <button key={item} type="button" className={selected ? "selected" : undefined} aria-pressed={selected} onClick={() => onAccessChange(item)}>

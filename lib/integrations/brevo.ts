@@ -20,8 +20,8 @@ export async function sendTransactionalEmail(input: {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) throw new BrevoError("BREVO_API_KEY is not set");
 
-  const senderEmail = process.env.BREVO_SENDER_EMAIL ?? "support@orbie.dev";
-  const senderName = process.env.BREVO_SENDER_NAME ?? "Orbie";
+  const senderEmail = process.env.BREVO_SENDER_EMAIL ?? "support@notto.site";
+  const senderName = process.env.BREVO_SENDER_NAME ?? "Notto";
 
   const res = await fetch(BREVO_API_URL, {
     method: "POST",

@@ -1,23 +1,15 @@
 import { randomUUID } from "node:crypto";
 
-import { z } from "zod";
-
 import {
   createPendingPurchase,
   getPurchaseByProviderReference,
   setPurchaseStatus,
 } from "@/lib/db/purchases";
-import { createCheckoutUrl, verifyWebhookSignature } from "@/lib/integrations/contra";
+import { createCheckoutUrl, fetchSale, isValidWebhookToken } from "@/lib/integrations/gumroad";
 import { ConflictError, UnauthorizedError, ValidationError } from "@/lib/shared/errors";
 
-// Provisional shape — adjust once Contra's actual webhook payload is confirmed.
-const webhookEventSchema = z.object({
-  reference: z.string().min(1),
-  status: z.enum(["completed", "refunded"]),
-});
-
 export class CheckoutService {
-  /** Creates a pending purchase row and returns the Contra checkout URL to redirect the user to. */
+  /** Creates a pending purchase row and returns the Gumroad checkout URL to redirect the user to. */
   static async createCheckoutSession(userId: string, customerEmail: string): Promise<string> {
     const reference = randomUUID();
     await createPendingPurchase({ userId, providerReference: reference });
@@ -25,29 +17,35 @@ export class CheckoutService {
   }
 
   /**
-   * Verifies the inbound Contra webhook's signature, then applies the event.
-   * The route only extracts the raw body and header — signature verification
-   * and payload parsing stay behind the service boundary like every other
-   * integration call.
+   * Gumroad's ping/resource_subscription callbacks are unsigned and
+   * form-encoded (not JSON). Authenticity comes from the shared `token` on
+   * the registered callback URL, then a mandatory server-to-server re-fetch
+   * of the sale from Gumroad's API before any purchase status is trusted —
+   * the route only extracts the raw body and token, everything else stays
+   * behind the service boundary like every other integration call.
    */
-  static async verifyAndApplyWebhook(rawBody: string, signatureHeader: string | null): Promise<void> {
-    if (!verifyWebhookSignature(rawBody, signatureHeader)) {
-      throw new UnauthorizedError("Invalid webhook signature");
+  static async verifyAndApplyWebhook(rawBody: string, webhookToken: string | null): Promise<void> {
+    if (!isValidWebhookToken(webhookToken)) {
+      throw new UnauthorizedError("Invalid webhook token");
     }
 
-    let json: unknown;
-    try {
-      json = JSON.parse(rawBody);
-    } catch {
-      throw new ValidationError("Invalid webhook payload");
+    const params = new URLSearchParams(rawBody);
+    const saleId = params.get("sale_id");
+    if (!saleId) throw new ValidationError("Invalid webhook payload — missing sale_id");
+
+    // Gumroad's "Send test ping" button — acknowledge, nothing to apply.
+    if (params.get("test") === "true") return;
+
+    const sale = await fetchSale(saleId);
+    if (!sale.reference) {
+      throw new ConflictError(`Gumroad sale ${saleId} has no reference — cannot match a pending purchase.`);
     }
 
-    const parsed = webhookEventSchema.safeParse(json);
-    if (!parsed.success) throw new ValidationError("Invalid webhook payload");
+    const purchase = await getPurchaseByProviderReference(sale.reference);
+    if (!purchase) throw new ConflictError(`No pending purchase found for reference ${sale.reference}.`);
 
-    const purchase = await getPurchaseByProviderReference(parsed.data.reference);
-    if (!purchase) throw new ConflictError(`No pending purchase found for reference ${parsed.data.reference}.`);
-
-    await setPurchaseStatus(purchase.id, parsed.data.status);
+    // `purchases.status` has no separate "disputed" state — a dispute revokes
+    // access the same way a refund does, conservatively, until it's resolved.
+    await setPurchaseStatus(purchase.id, sale.refunded || sale.disputed ? "refunded" : "completed");
   }
 }

@@ -5,7 +5,7 @@ import { handleApiError, ok } from "@/lib/shared/api-response";
 export async function POST(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
     // Public by design: free templates are copyable without an account.
-    // TemplateService enforces the All Access requirement for premium ones.
+    // TemplateService enforces the All Access requirement for plus ones.
     const { slug } = await params;
     const user = await getCurrentUser();
 

@@ -1,5 +1,5 @@
-/* Orbie design tokens — Tailwind CSS v4
- * Source of truth: orbie .pen document, "Foundations" area.
+/* Notto design tokens — Tailwind CSS v4
+ * Source of truth: notto .pen document, "Foundations" area.
  * Import once in app/globals.css:  @import "tailwindcss"; @import "./tokens.css";
  * Phase one is dark-only: these are the only values, there is no light theme.
  */
@@ -44,15 +44,21 @@
   --color-danger:          #E8565C;
   --color-danger-fg:       #FF8A8F;
   --color-danger-tint:     #E8565C1F;
-  --color-premium:         #C9A227; /* always paired with the word "Premium" */
-  --color-premium-fg:      #E8C65A;
-  --color-premium-tint:    #C9A2271F;
-  --color-premium-border:  #C9A22759;
+  --color-plus:         #E8752E; /* always paired with the word "Plus" */
+  --color-plus-fg:      #FF9152;
+  --color-plus-tint:    #E8752E1F;
+  --color-plus-border:  #E8752E59;
+  --color-urgent:       #F0304F; /* scarcity/urgency copy only — kept apart from the orange plus/accent hue so it reads as its own signal */
+  --color-urgent-fg:    #FF6B82;
+  --color-urgent-tint:  #F0304F1F;
+  --color-urgent-border: #F0304F59;
+  --color-price-fg:     #4ADE80; /* neon green for the live price inside urgency copy — reads as a deal against the orange CTA */
 
   /* ---- Type ---- */
-  /* A single-family system keeps metadata from feeling like a developer dashboard. */
-  --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  /* Bricolage Grotesque everywhere — headings, body/UI text, and metadata. */
+  --font-heading: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
 
   --text-display:    2.75rem;  /* 44 / 300 / -1.8px  page + dialog headings */
   --text-display--line-height: 1.08;
@@ -126,7 +132,7 @@
                                shadow — see individual component comments.
                                True structural dividers (header/footer rules,
                                table grids, row separators) and semantic
-                               status borders (danger/success/premium/accent
+                               status borders (danger/success/plus/accent
                                state) are NOT part of this recipe — they stay
                                bordered on purpose.
    elevation-1  card hover     bg-surface-active + shadow intensifies:

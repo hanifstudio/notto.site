@@ -16,7 +16,7 @@
 .account-page--signed-out h1 {
   margin: 0;
   font-size: var(--text-h1);
-  font-weight: 300;
+  font-weight: 700;
   letter-spacing: -1px;
 }
 

@@ -16,12 +16,12 @@ export type AuthMode = "login" | "register" | "forgot" | "reset";
 const content = {
   login: {
     title: "Log in",
-    intro: "Copy premium templates with your Lifetime All Access.",
+    intro: "Copy plus templates with your Lifetime All Access.",
     submit: "Log in",
   },
   register: {
     title: "Create your account",
-    intro: "An account is only needed for premium templates. Free pages stay copyable without one.",
+    intro: "An account is only needed for plus templates. Free pages stay copyable without one.",
     submit: "Create account",
   },
   forgot: {
@@ -143,7 +143,7 @@ export function AuthPage({
           <p>If an account exists for that address, a reset link is on its way.</p>
           <div className="auth-notice">The link expires in 60 minutes and can only be used once. If it doesn&apos;t arrive, check your spam folder.</div>
           <Link className={buttonClass("secondary", true)} href="/login">Back to log in</Link>
-          <small>Still nothing after a few minutes? Email <a href="mailto:support@orbie.dev">support@orbie.dev</a> and we&apos;ll help.</small>
+          <small>Still nothing after a few minutes? Email <a href="mailto:support@notto.site">support@notto.site</a> and we&apos;ll help.</small>
         </div></section>
       </AuthShell>
     );

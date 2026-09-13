@@ -7,7 +7,7 @@ import { useAuth } from "@/features/auth/auth-provider";
 import type { TemplateSummary } from "@/lib/catalog";
 import {
   getTemplateSource,
-  PremiumAccessRequiredError,
+  PlusAccessRequiredError,
   writeToClipboard,
 } from "@/lib/client/template-copy";
 
@@ -33,7 +33,7 @@ export function useTemplateCopy({
   }, [toast]);
 
   async function copy(template: TemplateSummary) {
-    if (template.access === "premium" && session?.entitlement !== "active") {
+    if (template.access === "plus" && session?.entitlement !== "active") {
       onAccessRequired(template);
       return;
     }
@@ -50,7 +50,7 @@ export function useTemplateCopy({
         }, 2500),
       );
     } catch (error) {
-      if (error instanceof PremiumAccessRequiredError) {
+      if (error instanceof PlusAccessRequiredError) {
         setStatuses((current) => ({ ...current, [template.slug]: "idle" }));
         onAccessRequired(template);
         return;

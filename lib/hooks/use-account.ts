@@ -18,7 +18,7 @@ async function fetchAccount(): Promise<Account> {
 
 /**
  * Wraps /api/account in React Query — the entitlement badge (account page,
- * premium copy gate, navbar) is read in more than one place per session, so
+ * plus copy gate, navbar) is read in more than one place per session, so
  * client-side caching genuinely saves requests here.
  */
 export function useAccount() {

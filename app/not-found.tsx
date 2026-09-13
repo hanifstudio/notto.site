@@ -5,7 +5,7 @@ import { buttonClass } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
-    <PageShell back={{ label: "Back to Orbie", href: "/" }}>
+    <PageShell back={{ label: "Back to Notto", href: "/" }}>
       <section className="route-message">
         <span><SearchX aria-hidden="true" /></span>
         <h1>That page isn&apos;t in the directory.</h1>

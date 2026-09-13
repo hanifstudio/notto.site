@@ -7,17 +7,18 @@ import { MinimalShell } from "@/components/layout/minimal-shell";
 import { buttonClass } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/auth-provider";
 import { useAccount } from "@/lib/hooks/use-account";
+import { LIFETIME_PRICE } from "@/lib/catalog";
 
 export type CheckoutState = "verified" | "verifying" | "failed" | "cancelled";
 
 const copy = {
   verified: {
     title: "All Access is active",
-    intro: "Every premium template is unlocked on your account.",
+    intro: "Every plus template is unlocked on your account.",
   },
   verifying: {
     title: "Confirming your payment",
-    intro: "Contra has taken the payment. We're waiting for their confirmation before unlocking premium templates.",
+    intro: "Gumroad has taken the payment. We're waiting for their confirmation before unlocking plus templates.",
   },
   failed: {
     title: "We couldn't confirm your payment",
@@ -34,7 +35,7 @@ export function CheckoutPage({ initialState }: { initialState: CheckoutState }) 
   const auth = useAuth();
   const { data: account, refetch } = useAccount();
 
-  // Poll /api/account while waiting for the Contra webhook to land — no client-side timer fakes activation.
+  // Poll /api/account while waiting for the Gumroad webhook to land — no client-side timer fakes activation.
   useEffect(() => {
     if (state !== "verifying") return;
     const interval = window.setInterval(() => {
@@ -53,7 +54,7 @@ export function CheckoutPage({ initialState }: { initialState: CheckoutState }) 
 
   const Icon = displayState === "verified" ? Check : displayState === "verifying" ? Clock3 : displayState === "cancelled" ? X : CircleAlert;
   const rows = displayState === "verified"
-    ? [["Payment", `Verified with Contra · ${purchasedLabel}`], ["Access", "Lifetime All Access · all premium templates"], ["Receipt", `Sent to ${auth.session?.email ?? "your email"}`]]
+    ? [["Payment", `Verified with Gumroad · ${purchasedLabel}`], ["Access", "Lifetime All Access · all plus templates"], ["Receipt", `Sent to ${auth.session?.email ?? "your email"}`]]
     : displayState === "verifying"
       ? [["Payment", "Received · awaiting confirmation"], ["Access", "Activates automatically once confirmed"]]
       : displayState === "failed"
@@ -72,13 +73,13 @@ export function CheckoutPage({ initialState }: { initialState: CheckoutState }) 
         ) : null}
         <div className="checkout-actions">
           {displayState === "verified" ? (
-            <><Link className={buttonClass("primary")} href="/templates/northline-studio">Copy Northline Studio</Link><Link className={buttonClass("secondary")} href="/?access=premium">Browse premium templates</Link></>
+            <><Link className={buttonClass("primary")} href="/templates/northline-studio">Copy Northline Studio</Link><Link className={buttonClass("secondary")} href="/?access=plus">Browse plus templates</Link></>
           ) : displayState === "verifying" ? (
             <><button className={buttonClass("subtle")} type="button" disabled><LoaderCircle className="spin" aria-hidden="true" />Checking…</button><Link className={buttonClass("secondary")} href="/?access=free">Browse free templates</Link></>
           ) : displayState === "failed" ? (
-            <><a className={buttonClass("primary")} href="mailto:support@orbie.dev">Email support@orbie.dev</a><button className={buttonClass("secondary")} type="button" onClick={() => setState("verifying")}>Check again</button></>
+            <><a className={buttonClass("primary")} href="mailto:support@notto.site">Email support@notto.site</a><button className={buttonClass("secondary")} type="button" onClick={() => setState("verifying")}>Check again</button></>
           ) : (
-            <><Link className={buttonClass("secondary")} href="/templates/northline-studio">Back to Northline Studio</Link><Link className={buttonClass("primary")} href="/checkout/success?state=verifying">Try again — $12</Link></>
+            <><Link className={buttonClass("secondary")} href="/templates/northline-studio">Back to Northline Studio</Link><Link className={buttonClass("primary")} href="/checkout/success?state=verifying">{`Try again — $${LIFETIME_PRICE}`}</Link></>
           )}
         </div>
         <p className="checkout-note">

@@ -1,17 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { Sparkles } from "lucide-react";
+import { Flame } from "lucide-react";
 import { useState } from "react";
 import { PageShell } from "@/components/layout/page-shell";
 import { AccessBadge } from "@/components/ui/access-badge";
+import { AgentStack } from "@/components/ui/agent-stack";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Toast } from "@/components/ui/toast";
 import { AccessOffer } from "@/features/access/access-offer";
 import { useAuth } from "@/features/auth/auth-provider";
 import { RelatedCard } from "@/features/templates/related-card";
 import { useTemplateCopy } from "@/hooks/use-template-copy";
-import type { TemplateSummary } from "@/lib/catalog";
+import { LIFETIME_PRICE, LIFETIME_PRICE_NEXT, LIFETIME_SLOTS_LEFT, type TemplateSummary } from "@/lib/catalog";
 
 export function TemplateDetailPage({
   template,
@@ -23,21 +24,33 @@ export function TemplateDetailPage({
   const { session } = useAuth();
   const [offerOpen, setOfferOpen] = useState(false);
   const copy = useTemplateCopy({ onAccessRequired: () => setOfferOpen(true) });
-  const entitled = template.access === "premium" && session?.entitlement === "active";
-  const locked = template.access === "premium" && !entitled;
+  const entitled = template.access === "plus" && session?.entitlement === "active";
+  const locked = template.access === "plus" && !entitled;
   const status = copy.statusFor(template.slug);
 
   return (
     <PageShell back={{ label: "All templates", href: "/" }}>
       <section className="template-detail">
         <div className="detail-preview">
-          <Image
-            src={template.thumbnail}
-            alt={`${template.title} — ${template.category} template preview`}
-            fill
-            priority
-            sizes="(min-width: 900px) 66vw, 100vw"
-          />
+          {template.previewVideo ? (
+            <video
+              src={template.previewVideo}
+              poster={template.thumbnail}
+              aria-label={`${template.title} — ${template.category} template preview`}
+              autoPlay
+              muted
+              loop
+              playsInline
+            />
+          ) : (
+            <Image
+              src={template.thumbnail}
+              alt={`${template.title} — ${template.category} template preview`}
+              fill
+              priority
+              sizes="(min-width: 900px) 66vw, 100vw"
+            />
+          )}
         </div>
         <div className="detail-copy">
           <div className="detail-meta"><AccessBadge access={template.access} entitled={entitled} /><span>{template.category}</span></div>
@@ -47,17 +60,26 @@ export function TemplateDetailPage({
             {template.tags.map((tag) => <span key={tag}>{tag}</span>)}
           </div>
           <div className="detail-action">
+            <div className="agent-stack-row">
+              <span>Works with</span>
+              <AgentStack />
+            </div>
             <CopyButton status={status} locked={locked} detailed onClick={() => copy.copy(template)} />
-            <p><Sparkles aria-hidden="true" />Paste the HTML into your coding agent and describe what you want to change.</p>
+            {locked ? (
+              <p className="urgency-line">
+                <Flame aria-hidden="true" />
+                <span><strong>{LIFETIME_SLOTS_LEFT} lifetime spots</strong> left at <span className="price-highlight">${LIFETIME_PRICE}</span> — then <s>${LIFETIME_PRICE_NEXT}</s>.</span>
+              </p>
+            ) : null}
+            {locked ? (
+              <p className="detail-fineprint">Pay once. Yours for life — no subscription.</p>
+            ) : entitled ? (
+              <p className="detail-fineprint detail-fineprint--success">Unlocked with your Lifetime All Access.</p>
+            ) : null}
+            {status === "error" ? (
+              <p className="copy-error" role="alert">Your browser blocked clipboard access. Try again, or allow clipboard permissions for this site.</p>
+            ) : null}
           </div>
-          {locked ? (
-            <div className="access-note"><strong>Premium template</strong><p>Included in Lifetime All Access — $12 once, not a subscription. Free templates stay copyable without an account.</p></div>
-          ) : entitled ? (
-            <div className="access-note access-note--success">Unlocked with your Lifetime All Access.</div>
-          ) : null}
-          {status === "error" ? (
-            <p className="copy-error" role="alert">Your browser blocked clipboard access. Try again, or allow clipboard permissions for this site.</p>
-          ) : null}
         </div>
       </section>
       <section className="related-section" aria-labelledby="related-heading">

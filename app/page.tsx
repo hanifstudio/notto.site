@@ -16,7 +16,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   const params = await searchParams;
   const requestedAccess = single(params.access);
   const initialAccess =
-    requestedAccess === "free" || requestedAccess === "premium" ? requestedAccess : "all";
+    requestedAccess === "free" || requestedAccess === "plus" ? requestedAccess : "all";
   const requestedCategory = single(params.category);
   const initialCategory = categoryOptions.some((item) => item.value === requestedCategory)
     ? requestedCategory
@@ -24,14 +24,19 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   const requestedView = single(params.view);
   const initialView = requestedView === "loading" || requestedView === "error" ? requestedView : "ready";
+  const initialQuery = single(params.q);
 
-  const templates = await TemplateService.listDirectory();
+  const initialPage = await TemplateService.listDirectoryPage({
+    query: initialQuery,
+    access: initialAccess === "all" ? undefined : initialAccess,
+    category: initialCategory === "all" ? undefined : initialCategory,
+  });
 
   return (
     <DirectoryPage
-      templates={templates}
+      initialPage={initialPage}
       initialView={initialView}
-      initialQuery={single(params.q)}
+      initialQuery={initialQuery}
       initialAccess={initialAccess}
       initialCategory={initialCategory}
     />

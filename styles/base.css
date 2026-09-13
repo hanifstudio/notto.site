@@ -13,9 +13,18 @@ body {
   margin: 0;
   background: var(--color-app);
   color: var(--color-fg);
-  font-family: var(--font-satoshi-loaded), var(--font-sans);
+  font-family: var(--font-heading-loaded), var(--font-sans);
   font-size: var(--text-base);
   -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading-loaded), var(--font-heading);
 }
 
 button,
@@ -77,19 +86,6 @@ a {
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: var(--text-lg);
-  font-weight: 500;
-  letter-spacing: -0.5px;
-}
-
-.orb {
-  width: 16px;
-  height: 16px;
-  flex: none;
-  border-radius: 999px;
-  background: radial-gradient(ellipse 50% 50% at 32% 28%, var(--color-accent-hover) 0%, var(--color-accent) 45%, var(--color-accent-press) 100%);
-  box-shadow: 0 0 16px -3px var(--color-accent-border);
 }
 
 .login-link {

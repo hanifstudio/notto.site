@@ -11,18 +11,20 @@ import { DirectoryEmptyState } from "@/features/directory/directory-empty-state"
 import { DirectoryFilters } from "@/features/directory/directory-filters";
 import { DirectoryLoadFailure, DirectorySkeleton } from "@/features/directory/directory-status";
 import { TemplateCard } from "@/features/directory/template-card";
-import { type AccessFilter, useDirectoryFilters } from "@/features/directory/use-directory-filters";
+import { useDirectoryFilters } from "@/features/directory/use-directory-filters";
 import { useTemplateCopy } from "@/hooks/use-template-copy";
-import type { TemplateSummary } from "@/lib/catalog";
+import { useTemplates, type TemplatesPage } from "@/lib/hooks/use-templates";
+import { LIFETIME_PRICE } from "@/lib/catalog";
+import type { AccessFilter, TemplateSummary } from "@/lib/catalog";
 
 export function DirectoryPage({
-  templates,
+  initialPage,
   initialQuery = "",
   initialAccess = "all",
   initialCategory = "all",
   initialView = "ready",
 }: {
-  templates: TemplateSummary[];
+  initialPage: TemplatesPage;
   initialQuery?: string;
   initialAccess?: AccessFilter;
   initialCategory?: string;
@@ -32,11 +34,15 @@ export function DirectoryPage({
   const [view, setView] = useState(initialView);
   const [offerTemplate, setOfferTemplate] = useState<TemplateSummary | null>(null);
   const [offerOpen, setOfferOpen] = useState(false);
-  const filters = useDirectoryFilters(templates, {
+  const filters = useDirectoryFilters({
     query: initialQuery,
     access: initialAccess,
     category: initialCategory,
   });
+  const templatesQuery = useTemplates(
+    { query: filters.debouncedQuery, access: filters.access, category: filters.category },
+    { initialPage, initialFilters: { query: initialQuery, access: initialAccess, category: initialCategory } },
+  );
   const copy = useTemplateCopy({
     onAccessRequired(template) {
       setOfferTemplate(template);
@@ -44,6 +50,11 @@ export function DirectoryPage({
     },
   });
   const entitled = session?.entitlement === "active";
+
+  const loadedTemplates = templatesQuery.data?.pages.flatMap((page) => page.templates) ?? [];
+  const total = templatesQuery.data?.pages[0]?.total ?? 0;
+  const effectiveView =
+    view !== "ready" ? view : templatesQuery.isPending ? "loading" : templatesQuery.isError ? "error" : "ready";
 
   return (
     <div className="app-shell">
@@ -53,12 +64,12 @@ export function DirectoryPage({
           <div className="masthead-copy">
             <h1 id="directory-intro">Distinctive, complete HTML pages for your next build. Copy one and make it yours with any coding agent.</h1>
             <div className="stats" aria-label="Catalogue summary">
-              <span>20 curated pages</span><i aria-hidden="true" /><span>10 free</span><i aria-hidden="true" /><span>Newest first</span>
+              <span>{total} curated {total === 1 ? "page" : "pages"}</span>
             </div>
           </div>
           {!entitled ? (
             <div className="offer-card">
-              <div><strong>Lifetime All Access</strong><span>$12 one time · not a subscription</span></div>
+              <div><strong>Lifetime All Access</strong><span>{`$${LIFETIME_PRICE} one time · not a subscription`}</span></div>
               <button
                 className={buttonClass("primary")}
                 type="button"
@@ -68,12 +79,12 @@ export function DirectoryPage({
                 }}
               >
                 <span className="desktop-offer-label">Get all access</span>
-                <span className="mobile-offer-label">Get all access — $12</span>
+                <span className="mobile-offer-label">{`Get all access — $${LIFETIME_PRICE}`}</span>
               </button>
               <p>One payment, not a subscription. Free pages copy without an account.</p>
             </div>
           ) : (
-            <div className="entitled-summary"><strong>Lifetime All Access</strong><span>Every premium template is unlocked.</span></div>
+            <div className="entitled-summary"><strong>Lifetime All Access</strong><span>Every plus template is unlocked.</span></div>
           )}
         </section>
 
@@ -84,27 +95,49 @@ export function DirectoryPage({
           onAccessChange={filters.setAccess}
           category={filters.category}
           onCategoryChange={filters.setCategory}
-          resultCount={filters.filteredTemplates.length}
+          resultCount={total}
           filtersActive={filters.filtersActive}
           onClear={filters.clear}
         />
 
         <section className="results" aria-label="Template results">
-          {view === "loading" ? <DirectorySkeleton />
-            : view === "error" ? <DirectoryLoadFailure onRetry={() => setView("ready")} />
-              : filters.filteredTemplates.length ? (
-                <div className="template-grid">
-                  {filters.filteredTemplates.map((template) => (
-                    <TemplateCard
-                      key={template.slug}
-                      template={template}
-                      entitled={entitled}
-                      copyStatus={copy.statusFor(template.slug)}
-                      onCopy={copy.copy}
-                    />
-                  ))}
-                </div>
-              ) : <DirectoryEmptyState onClear={filters.clear} />}
+          {effectiveView === "loading" ? <DirectorySkeleton />
+            : effectiveView === "error" ? (
+              <DirectoryLoadFailure
+                onRetry={() => {
+                  setView("ready");
+                  void templatesQuery.refetch();
+                }}
+              />
+            )
+              : total === 0 ? <DirectoryEmptyState onClear={filters.clear} />
+                : (
+                  <>
+                    <div className="template-grid">
+                      {loadedTemplates.map((template) => (
+                        <TemplateCard
+                          key={template.slug}
+                          template={template}
+                          entitled={entitled}
+                          copyStatus={copy.statusFor(template.slug)}
+                          onCopy={copy.copy}
+                        />
+                      ))}
+                    </div>
+                    {templatesQuery.hasNextPage ? (
+                      <div className="load-more">
+                        <button
+                          className={buttonClass("secondary")}
+                          type="button"
+                          onClick={() => templatesQuery.fetchNextPage()}
+                          disabled={templatesQuery.isFetchingNextPage}
+                        >
+                          {templatesQuery.isFetchingNextPage ? "Loading…" : "Load more"}
+                        </button>
+                      </div>
+                    ) : null}
+                  </>
+                )}
         </section>
       </main>
       <SiteFooter />

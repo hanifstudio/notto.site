@@ -36,7 +36,7 @@ export class AuthService {
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${rawToken}`;
     await sendTransactionalEmail({
       to: { email: user.email },
-      subject: "Reset your Orbie password",
+      subject: "Reset your Notto password",
       htmlContent: `<p>Reset your password by clicking the link below. It expires in 60 minutes and can only be used once.</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>If you didn't request this, you can ignore this email.</p>`,
     });
   }
