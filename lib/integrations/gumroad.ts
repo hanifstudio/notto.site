@@ -54,6 +54,9 @@ function requireEnv(name: string): string {
 export function createCheckoutUrl(input: { reference: string; customerEmail: string }): string {
   const productUrl = requireEnv("GUMROAD_PRODUCT_URL");
   const url = new URL(productUrl);
+  // Skips Gumroad's product landing page and opens the payment form directly
+  // (gumroad.com/help/article/144-send-customers-directly-to-your-payment-form).
+  url.searchParams.set("wanted", "true");
   url.searchParams.set("reference", input.reference);
   url.searchParams.set("email", input.customerEmail);
   return url.toString();
