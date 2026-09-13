@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, CircleAlert, Clock3, LoaderCircle, X } from "lucide-react";
+import { Check, CircleAlert, CircleUserRound, Clock3, LoaderCircle, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MinimalShell } from "@/components/layout/minimal-shell";
 import { buttonClass } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { useAccount } from "@/lib/hooks/use-account";
 import { LIFETIME_PRICE } from "@/lib/catalog";
 
 export type CheckoutState = "verified" | "verifying" | "failed" | "cancelled";
+
+const VERIFY_TIMEOUT_MS = 2 * 60 * 1000;
 
 const copy = {
   verified: {
@@ -35,18 +37,37 @@ export function CheckoutPage({ initialState }: { initialState: CheckoutState }) 
   const auth = useAuth();
   const { data: account, refetch } = useAccount();
 
-  // Poll /api/account while waiting for the Gumroad webhook to land — no client-side timer fakes activation.
-  useEffect(() => {
-    if (state !== "verifying") return;
-    const interval = window.setInterval(() => {
-      void refetch();
-    }, 4000);
-    return () => window.clearInterval(interval);
-  }, [state, refetch]);
-
   // Derived, not stored: once the account query confirms access, render as
   // "verified" without a second effect writing state back.
   const displayState = state === "verifying" && account?.entitlement === "active" ? "verified" : state;
+
+  // Poll /api/account while waiting for the Gumroad webhook to land — no client-side timer fakes activation.
+  // Keyed off displayState (not the raw state) so both the poll and the timeout
+  // actually stop once the account query confirms "verified".
+  useEffect(() => {
+    if (displayState !== "verifying") return;
+    const interval = window.setInterval(() => {
+      void refetch();
+    }, 4000);
+    const timeout = window.setTimeout(() => setState("failed"), VERIFY_TIMEOUT_MS);
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(timeout);
+    };
+  }, [displayState, refetch]);
+
+  if (!auth.loading && !auth.session) {
+    return (
+      <MinimalShell className="checkout-only-shell">
+        <section className="checkout-page account-page--signed-out">
+          <span className="account-empty-icon"><CircleUserRound aria-hidden="true" /></span>
+          <h1>Sign in to view this page</h1>
+          <p>Your purchase confirmation is tied to your account.</p>
+          <Link className={buttonClass("primary")} href="/login?next=%2Fcheckout%2Fsuccess">Log in</Link>
+        </section>
+      </MinimalShell>
+    );
+  }
 
   const purchasedLabel = account?.purchasedAt
     ? new Date(account.purchasedAt).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
@@ -64,7 +85,9 @@ export function CheckoutPage({ initialState }: { initialState: CheckoutState }) 
   return (
     <MinimalShell className="checkout-only-shell">
       <section className={`checkout-page checkout-page--${displayState}`}>
-        <span className="checkout-icon"><Icon className={displayState === "verifying" ? "spin-slow" : undefined} aria-hidden="true" /></span>
+        {displayState !== "verified" ? (
+          <span className="checkout-icon"><Icon className={displayState === "verifying" ? "spin-slow" : undefined} aria-hidden="true" /></span>
+        ) : null}
         <div className="checkout-heading"><h1>{copy[displayState].title}</h1><p>{copy[displayState].intro}</p></div>
         {rows.length ? (
           <dl className="checkout-details">
@@ -73,7 +96,7 @@ export function CheckoutPage({ initialState }: { initialState: CheckoutState }) 
         ) : null}
         <div className="checkout-actions">
           {displayState === "verified" ? (
-            <><Link className={buttonClass("primary")} href="/templates/northline-studio">Copy Northline Studio</Link><Link className={buttonClass("secondary")} href="/?access=plus">Browse plus templates</Link></>
+            <Link className={buttonClass("primary")} href="/">Browse templates</Link>
           ) : displayState === "verifying" ? (
             <><button className={buttonClass("subtle")} type="button" disabled><LoaderCircle className="spin" aria-hidden="true" />Checking…</button><Link className={buttonClass("secondary")} href="/?access=free">Browse free templates</Link></>
           ) : displayState === "failed" ? (

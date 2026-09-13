@@ -47,6 +47,7 @@
 .checkout-page--verifying .checkout-details > div:first-child dd { color: var(--color-warning-fg); }
 
 .checkout-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.checkout-page--verified .checkout-actions { grid-template-columns: 1fr; }
 .checkout-actions > * { min-height: 47px; }
 .checkout-note { margin: 20px 0 0; color: var(--color-fg-subtle); font-size: var(--text-xs); line-height: 1.5; }
 
