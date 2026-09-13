@@ -15,7 +15,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: appUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
     { url: `${appUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${appUrl}/terms`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${appUrl}/refunds`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const templateEntries: MetadataRoute.Sitemap = templates.map((template) => ({

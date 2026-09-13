@@ -25,7 +25,7 @@ export const legalDocuments = {
       { id: "your-account", title: "Your account", paragraphs: ["You are responsible for keeping your account credentials private and for activity performed through your account. Contact us promptly if you believe your account has been compromised."] },
       { id: "payment", title: "Payment and access", paragraphs: ["Payments are processed by Gumroad. Notto never receives or stores your card details. Access is granted only after payment is verified; a return to this site is not by itself proof of payment."], table: [["Nothing", "All free templates, no account required"], [`$${LIFETIME_PRICE} USD once`, "Every plus template, including ones added later"]] },
       { id: "licence", title: "Licence to use templates", paragraphs: ["You may use any template you have copied in unlimited personal and commercial projects, modify it freely, and ship it to clients. You may not resell the templates as templates or redistribute the catalogue itself."], bullets: ["Unlimited personal and commercial projects.", "No attribution required.", "No redistribution of templates as templates.", "No transfer of account access to another person."] },
-      { id: "refunds", title: "Refunds", paragraphs: ["Refund eligibility is described in the Refund Policy. An approved refund revokes Lifetime All Access while leaving free templates available."] },
+      { id: "refunds", title: "Refunds", paragraphs: ["You may request a refund within seven days of purchase if the account has not successfully copied a plus template. Once plus source has been copied, the purchase is non-refundable except where applicable law requires otherwise. An approved refund revokes Lifetime All Access while leaving free templates available."] },
       { id: "shutdown", title: "Shutdown pledge", paragraphs: ["If Notto is ever discontinued, every template in the catalogue will be released under an open-source licence. Your existing copies remain yours either way."] },
       { id: "contact", title: "Contact", paragraphs: ["Questions about these terms can be sent to support@notto.site."] },
     ],
@@ -41,19 +41,6 @@ export const legalDocuments = {
       { id: "retention", title: "Retention and security", paragraphs: ["Records are retained only as long as needed for account access, payment audit, legal obligations, and security. Passwords and session tokens are never stored in plain text."] },
       { id: "choices", title: "Your choices", paragraphs: ["You may request access to or deletion of your personal information, subject to records we must retain for legal or fraud-prevention purposes."] },
       { id: "contact", title: "Contact", paragraphs: ["Privacy questions and requests can be sent to support@notto.site."] },
-    ],
-  },
-  refunds: {
-    title: "Refund Policy",
-    updated: "12 September 2026",
-    introduction: "Notto sells immediate access to copyable source code. This policy aims to be fair while recognizing that source cannot be returned after it has been accessed.",
-    sections: [
-      { id: "eligibility", title: "Refund eligibility", paragraphs: ["You may request a refund within seven days of purchase if the account has not successfully copied a plus template."], bullets: ["The request is made within seven days.", "No plus template has been successfully copied.", "The purchase can be matched to your Notto account."] },
-      { id: "after-copy", title: "After plus source is accessed", paragraphs: ["Once plus source has been successfully copied, the purchase is non-refundable except where applicable law requires otherwise."] },
-      { id: "request", title: "How to request a refund", paragraphs: ["Email support@notto.site from the address on your Notto account and include your Gumroad purchase reference. We will confirm receipt and review the access record."] },
-      { id: "revocation", title: "Access after a refund", paragraphs: ["An approved refund revokes Lifetime All Access. Your account remains available and all free templates remain copyable."] },
-      { id: "provider", title: "Processing time", paragraphs: ["Approved refunds are sent through Gumroad. Your bank or payment method may take additional time to display the credit."] },
-      { id: "contact", title: "Contact", paragraphs: ["Questions about a purchase or refund can be sent to support@notto.site."] },
     ],
   },
 } satisfies Record<string, LegalDocument>;

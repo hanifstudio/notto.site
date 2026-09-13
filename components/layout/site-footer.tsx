@@ -11,7 +11,6 @@ export function SiteFooter() {
       <nav aria-label="Legal and support">
         <Link href="/terms">Terms</Link>
         <Link href="/privacy">Privacy</Link>
-        <Link href="/refunds">Refunds</Link>
         <a href="mailto:support@notto.site">Support</a>
       </nav>
     </footer>
