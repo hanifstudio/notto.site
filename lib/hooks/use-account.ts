@@ -10,6 +10,7 @@ export type Account = {
   email: string;
   entitlement: "free" | "active" | "revoked";
   purchasedAt: string | null;
+  nextAccessRefreshAt: string | null;
 };
 
 async function fetchAccount(): Promise<Account> {

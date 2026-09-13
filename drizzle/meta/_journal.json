@@ -50,6 +50,13 @@
       "when": 1789312352225,
       "tag": "0006_breezy_mandroid",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789321136621,
+      "tag": "0007_calm_magdalene",
+      "breakpoints": true
     }
   ]
 }

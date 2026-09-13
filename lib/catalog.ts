@@ -9,6 +9,11 @@ export const LIFETIME_SLOTS_LEFT = 7;
 export const LIFETIME_PRICE = 14;
 export const LIFETIME_PRICE_NEXT = 20;
 
+// Shared between CheckoutService (enforces it) and AccessService (surfaces
+// the next-allowed time to the client) so the account page can show a
+// countdown instead of only reacting to a 429 after the user clicks.
+export const ACCESS_REFRESH_COOLDOWN_SECONDS = 5 * 60;
+
 export type TemplateSummary = {
   slug: string;
   title: string;

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, CircleAlert, CircleUserRound } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MinimalShell } from "@/components/layout/minimal-shell";
 import { Button, buttonClass } from "@/components/ui/button";
 import { AccessOffer } from "@/features/access/access-offer";
@@ -30,13 +30,31 @@ const accountCopy = {
   },
 } satisfies Record<EntitlementStatus, { title: string; summary: string; badge: string }>;
 
+function formatCooldown(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${minutes}:${rest.toString().padStart(2, "0")}`;
+}
+
 export function AccountPage({ previewStatus }: { previewStatus?: EntitlementStatus }) {
   const router = useRouter();
   const auth = useAuth();
-  const { refetch: refetchAccount } = useAccount();
+  const { data: account, refetch: refetchAccount } = useAccount();
   const [offerOpen, setOfferOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshMessage, setRefreshMessage] = useState("");
+  const [now, setNow] = useState(() => Date.now());
+
+  const nextAccessRefreshAt = account?.nextAccessRefreshAt ? new Date(account.nextAccessRefreshAt).getTime() : null;
+  const cooldownSeconds = nextAccessRefreshAt ? Math.max(0, Math.ceil((nextAccessRefreshAt - now) / 1000)) : 0;
+
+  // Ticks once a second only while a cooldown is actually running, so the
+  // button re-enables and the countdown updates without a manual refetch.
+  useEffect(() => {
+    if (!nextAccessRefreshAt || cooldownSeconds <= 0) return;
+    const interval = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, [nextAccessRefreshAt, cooldownSeconds]);
 
   async function refreshAccess() {
     setRefreshMessage("");
@@ -47,7 +65,6 @@ export function AccountPage({ previewStatus }: { previewStatus?: EntitlementStat
         {},
       );
       if (result === "granted") {
-        await refetchAccount();
         setRefreshMessage("Access updated — you're all set.");
       } else if (result === "already_active") {
         setRefreshMessage("Your access is already active.");
@@ -57,6 +74,9 @@ export function AccountPage({ previewStatus }: { previewStatus?: EntitlementStat
     } catch (error) {
       setRefreshMessage(error instanceof ApiClientError ? error.message : "Couldn't check right now. Try again shortly.");
     } finally {
+      // Every attempt (granted, not_found, or 429) can change nextAccessRefreshAt
+      // server-side, so re-sync regardless of which branch above ran.
+      await refetchAccount();
       setRefreshing(false);
     }
   }
@@ -110,7 +130,13 @@ export function AccountPage({ previewStatus }: { previewStatus?: EntitlementStat
         {status === "free" ? (
           <div className="account-actions">
             <p>Already paid but access hasn&rsquo;t shown up?</p>
-            <Button onClick={refreshAccess} disabled={refreshing}>{refreshing ? "Checking…" : "Refresh access"}</Button>
+            <Button onClick={refreshAccess} disabled={refreshing || cooldownSeconds > 0}>
+              {refreshing
+                ? "Checking…"
+                : cooldownSeconds > 0
+                  ? `Try again in ${formatCooldown(cooldownSeconds)}`
+                  : "Refresh access"}
+            </Button>
           </div>
         ) : null}
         {refreshMessage ? <p className="dialog-note" role="status">{refreshMessage}</p> : null}

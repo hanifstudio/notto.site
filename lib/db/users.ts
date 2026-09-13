@@ -23,3 +23,7 @@ export async function createUser(input: { email: string; passwordHash: string })
 export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
   await db.update(users).set({ passwordHash }).where(eq(users.id, id));
 }
+
+export async function touchAccessRefresh(id: string): Promise<void> {
+  await db.update(users).set({ lastAccessRefreshAt: new Date() }).where(eq(users.id, id));
+}

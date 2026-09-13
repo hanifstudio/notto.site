@@ -13,6 +13,7 @@ export async function GET() {
       email: user.email,
       entitlement: entitlement.status,
       purchasedAt: entitlement.purchasedAt?.toISOString() ?? null,
+      nextAccessRefreshAt: entitlement.nextAccessRefreshAt?.toISOString() ?? null,
     });
   } catch (error) {
     return handleApiError(error, "GET /api/account");

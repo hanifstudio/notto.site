@@ -23,6 +23,8 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  // Rate-limits POST /api/account/refresh (self-service Gumroad reconciliation) to once per 5 minutes.
+  lastAccessRefreshAt: timestamp("last_access_refresh_at", { withTimezone: true }),
 });
 
 export const passwordResetTokens = pgTable(

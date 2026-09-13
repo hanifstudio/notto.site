@@ -9,6 +9,7 @@ import {
   hasCompletedPurchase,
   setPurchaseStatus,
 } from "@/lib/db/purchases";
+import { getUserById, touchAccessRefresh } from "@/lib/db/users";
 import {
   createCheckoutUrl,
   extractReference,
@@ -17,9 +18,12 @@ import {
   isGumroadWebhookEvent,
   isValidWebhookToken,
 } from "@/lib/integrations/gumroad";
-import { ConflictError, UnauthorizedError, ValidationError } from "@/lib/shared/errors";
+import { ACCESS_REFRESH_COOLDOWN_SECONDS } from "@/lib/catalog";
+import { ConflictError, TooManyRequestsError, UnauthorizedError, ValidationError } from "@/lib/shared/errors";
 
 export type ReconcileResult = "granted" | "already_active" | "not_found";
+
+const ACCESS_REFRESH_COOLDOWN_MS = ACCESS_REFRESH_COOLDOWN_SECONDS * 1000;
 
 export class CheckoutService {
   /** Creates a pending purchase row and returns the Gumroad checkout URL to redirect the user to. */
@@ -78,10 +82,22 @@ export class CheckoutService {
    * Self-service recovery for when a webhook never arrived or failed before
    * this fix shipped — looks up the buyer's own Gumroad sales by email rather
    * than requiring a working reference/webhook round trip. Each sale_id found
-   * is still re-verified through `fetchSale` before being trusted.
+   * is still re-verified through `fetchSale` before being trusted. Rate-limited
+   * to once per 5 minutes per user (a real reconciliation call, not the free
+   * "already_active" short-circuit) so it can't be used to hammer Gumroad's API.
    */
   static async reconcileAccess(userId: string, email: string): Promise<ReconcileResult> {
     if (await hasCompletedPurchase(userId)) return "already_active";
+
+    const user = await getUserById(userId);
+    if (user?.lastAccessRefreshAt) {
+      const elapsed = Date.now() - user.lastAccessRefreshAt.getTime();
+      if (elapsed < ACCESS_REFRESH_COOLDOWN_MS) {
+        const waitSeconds = Math.ceil((ACCESS_REFRESH_COOLDOWN_MS - elapsed) / 1000);
+        throw new TooManyRequestsError(`Try again in ${waitSeconds}s.`);
+      }
+    }
+    await touchAccessRefresh(userId);
 
     const saleIds = await findSaleIdsByEmail(email);
     for (const saleId of saleIds) {

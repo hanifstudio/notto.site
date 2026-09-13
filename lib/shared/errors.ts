@@ -50,6 +50,14 @@ export class ConflictError extends ApiError {
   }
 }
 
+export class TooManyRequestsError extends ApiError {
+  constructor(message = "Too many requests") {
+    super(message, 429, "TOO_MANY_REQUESTS");
+    this.name = "TooManyRequestsError";
+    Object.setPrototypeOf(this, TooManyRequestsError.prototype);
+  }
+}
+
 export class BadGatewayError extends ApiError {
   constructor(message = "Bad gateway") {
     super(message, 502, "BAD_GATEWAY");
