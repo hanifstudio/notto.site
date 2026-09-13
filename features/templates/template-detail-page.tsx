@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Flame } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageShell } from "@/components/layout/page-shell";
 import { AccessBadge } from "@/components/ui/access-badge";
 import { AgentStack } from "@/components/ui/agent-stack";
@@ -27,6 +27,12 @@ export function TemplateDetailPage({
   const entitled = template.access === "plus" && session?.entitlement === "active";
   const locked = template.access === "plus" && !entitled;
   const status = copy.statusFor(template.slug);
+
+  useEffect(() => {
+    copy.prefetch(template);
+    // Only re-run when the viewed template or the viewer's entitlement changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [template.slug, session?.entitlement]);
 
   return (
     <PageShell back={{ label: "All templates", href: "/" }}>

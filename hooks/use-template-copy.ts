@@ -20,6 +20,7 @@ export function useTemplateCopy({
   const [statuses, setStatuses] = useState<Record<string, CopyStatus>>({});
   const [toast, setToast] = useState<ToastState>(null);
   const resetTimers = useRef<number[]>([]);
+  const sourceCache = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     const timers = resetTimers.current;
@@ -32,15 +33,36 @@ export function useTemplateCopy({
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  function isLocked(template: TemplateSummary) {
+    return template.access === "plus" && session?.entitlement !== "active";
+  }
+
+  /**
+   * Warms the source cache ahead of a click (on hover/mount) so the click handler can call
+   * writeToClipboard synchronously — without an intervening network await, browsers keep
+   * treating it as a direct user gesture and skip the clipboard permission prompt.
+   * The server still enforces the plus gate on this same request; skipping it here for
+   * locked templates only avoids a request we already know will be rejected.
+   */
+  async function prefetch(template: TemplateSummary) {
+    if (isLocked(template) || sourceCache.current.has(template.slug)) return;
+    try {
+      const source = await getTemplateSource(template.slug);
+      sourceCache.current.set(template.slug, source);
+    } catch {
+      // Swallowed — the click-time flow below retries and surfaces any real error.
+    }
+  }
+
   async function copy(template: TemplateSummary) {
-    if (template.access === "plus" && session?.entitlement !== "active") {
+    if (isLocked(template)) {
       onAccessRequired(template);
       return;
     }
 
     setStatuses((current) => ({ ...current, [template.slug]: "copying" }));
     try {
-      const source = await getTemplateSource(template.slug);
+      const source = sourceCache.current.get(template.slug) ?? (await getTemplateSource(template.slug));
       await writeToClipboard(source);
       setStatuses((current) => ({ ...current, [template.slug]: "copied" }));
       setToast({ tone: "success", title: "HTML copied", body: "Paste it into your coding agent." });
@@ -66,6 +88,7 @@ export function useTemplateCopy({
 
   return {
     copy,
+    prefetch,
     statusFor: (slug: string) => statuses[slug] ?? "idle",
     toast,
     dismissToast: () => setToast(null),

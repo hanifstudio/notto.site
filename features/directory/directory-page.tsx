@@ -121,6 +121,7 @@ export function DirectoryPage({
                           entitled={entitled}
                           copyStatus={copy.statusFor(template.slug)}
                           onCopy={copy.copy}
+                          onPrefetchCopy={copy.prefetch}
                         />
                       ))}
                     </div>

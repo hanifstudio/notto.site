@@ -10,18 +10,23 @@ export function TemplateCard({
   entitled,
   copyStatus,
   onCopy,
+  onPrefetchCopy,
 }: {
   template: TemplateSummary;
   entitled: boolean;
   copyStatus: CopyStatus;
   onCopy: (template: TemplateSummary) => void;
+  onPrefetchCopy: (template: TemplateSummary) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   return (
     <article
       className="template-card"
-      onMouseEnter={() => videoRef.current?.play().catch(() => {})}
+      onMouseEnter={() => {
+        videoRef.current?.play().catch(() => {});
+        onPrefetchCopy(template);
+      }}
       onMouseLeave={() => {
         const video = videoRef.current;
         if (!video) return;
