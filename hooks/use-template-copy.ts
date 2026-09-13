@@ -5,11 +5,14 @@ import type { CopyStatus } from "@/components/ui/copy-button";
 import type { ToastState } from "@/components/ui/toast";
 import { useAuth } from "@/features/auth/auth-provider";
 import type { TemplateSummary } from "@/lib/catalog";
+import { track } from "@/lib/client/analytics";
 import {
   getTemplateSource,
   PlusAccessRequiredError,
   writeToClipboard,
 } from "@/lib/client/template-copy";
+
+export type CopySource = "card" | "detail";
 
 export function useTemplateCopy({
   onAccessRequired,
@@ -54,18 +57,22 @@ export function useTemplateCopy({
     }
   }
 
-  async function copy(template: TemplateSummary) {
+  async function copy(template: TemplateSummary, source: CopySource) {
+    track("copy_click", { slug: template.slug, source });
+
     if (isLocked(template)) {
+      track("paywall_hit", { slug: template.slug, source });
       onAccessRequired(template);
       return;
     }
 
     setStatuses((current) => ({ ...current, [template.slug]: "copying" }));
     try {
-      const source = sourceCache.current.get(template.slug) ?? (await getTemplateSource(template.slug));
-      await writeToClipboard(source);
+      const templateSource = sourceCache.current.get(template.slug) ?? (await getTemplateSource(template.slug));
+      await writeToClipboard(templateSource);
       setStatuses((current) => ({ ...current, [template.slug]: "copied" }));
       setToast({ tone: "success", title: "HTML copied", body: "Paste it into your coding agent." });
+      track("copy_success", { slug: template.slug, source });
       resetTimers.current.push(
         window.setTimeout(() => {
           setStatuses((current) => ({ ...current, [template.slug]: "idle" }));
@@ -73,6 +80,7 @@ export function useTemplateCopy({
       );
     } catch (error) {
       if (error instanceof PlusAccessRequiredError) {
+        track("paywall_hit", { slug: template.slug, source });
         setStatuses((current) => ({ ...current, [template.slug]: "idle" }));
         onAccessRequired(template);
         return;

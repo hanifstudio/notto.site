@@ -70,7 +70,7 @@ export function TemplateDetailPage({
               <span>Works with</span>
               <AgentStack />
             </div>
-            <CopyButton status={status} locked={locked} detailed onClick={() => copy.copy(template)} />
+            <CopyButton status={status} locked={locked} detailed onClick={() => copy.copy(template, "detail")} />
             {locked ? (
               <p className="urgency-line">
                 <Flame aria-hidden="true" />

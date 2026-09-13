@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { buttonClass } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { DirectoryLoadFailure, DirectorySkeleton } from "@/features/directory/di
 import { TemplateCard } from "@/features/directory/template-card";
 import { useDirectoryFilters } from "@/features/directory/use-directory-filters";
 import { useTemplateCopy } from "@/hooks/use-template-copy";
+import { track } from "@/lib/client/analytics";
 import { useTemplates, type TemplatesPage } from "@/lib/hooks/use-templates";
 import { LIFETIME_PRICE } from "@/lib/catalog";
 import type { AccessFilter, TemplateSummary } from "@/lib/catalog";
@@ -55,6 +56,20 @@ export function DirectoryPage({
   const total = templatesQuery.data?.pages[0]?.total ?? 0;
   const effectiveView =
     view !== "ready" ? view : templatesQuery.isPending ? "loading" : templatesQuery.isError ? "error" : "ready";
+
+  // Fires once per distinct filter combo that comes back empty, not on every
+  // re-render while that combo stays active.
+  const trackedEmptyFilters = useRef<string | null>(null);
+  useEffect(() => {
+    if (effectiveView !== "ready" || total !== 0 || !filters.filtersActive) {
+      trackedEmptyFilters.current = null;
+      return;
+    }
+    const key = `${filters.debouncedQuery}|${filters.access}|${filters.category}`;
+    if (trackedEmptyFilters.current === key) return;
+    trackedEmptyFilters.current = key;
+    track("filter_no_results", { query: filters.debouncedQuery, access: filters.access, category: filters.category });
+  }, [effectiveView, total, filters.filtersActive, filters.debouncedQuery, filters.access, filters.category]);
 
   return (
     <div className="app-shell">
@@ -120,7 +135,7 @@ export function DirectoryPage({
                           template={template}
                           entitled={entitled}
                           copyStatus={copy.statusFor(template.slug)}
-                          onCopy={copy.copy}
+                          onCopy={(t) => copy.copy(t, "card")}
                           onPrefetchCopy={copy.prefetch}
                         />
                       ))}

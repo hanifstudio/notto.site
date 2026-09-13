@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { AgentStack } from "@/components/ui/agent-stack";
 import { buttonClass } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/auth-provider";
+import { track } from "@/lib/client/analytics";
 import { ApiClientError, apiPost } from "@/lib/client/api-fetch";
 import { LIFETIME_PRICE, LIFETIME_PRICE_NEXT, LIFETIME_SLOTS_LEFT } from "@/lib/catalog";
 import { usePlusCount } from "@/lib/hooks/use-plus-count";
@@ -39,6 +40,7 @@ export function AccessOffer({
       const { checkoutUrl } = await apiPost<{ checkoutUrl: string }>("/api/checkout/session", {
         offerCode: offerCode.trim() || undefined,
       });
+      track("checkout_start", { templateTitle: templateTitle ?? null });
       window.location.href = checkoutUrl;
     } catch (error) {
       setCheckoutError(

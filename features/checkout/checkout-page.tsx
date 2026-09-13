@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { Check, CircleAlert, CircleUserRound, Clock3, LoaderCircle, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MinimalShell } from "@/components/layout/minimal-shell";
 import { buttonClass } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/auth-provider";
+import { track } from "@/lib/client/analytics";
 import { useAccount } from "@/lib/hooks/use-account";
 import { LIFETIME_PRICE } from "@/lib/catalog";
 
@@ -40,6 +41,14 @@ export function CheckoutPage({ initialState }: { initialState: CheckoutState }) 
   // Derived, not stored: once the account query confirms access, render as
   // "verified" without a second effect writing state back.
   const displayState = state === "verifying" && account?.entitlement === "active" ? "verified" : state;
+
+  // Fires once per confirmed purchase, not on every re-render or refetch while already verified.
+  const trackedSuccess = useRef(false);
+  useEffect(() => {
+    if (displayState !== "verified" || trackedSuccess.current) return;
+    trackedSuccess.current = true;
+    track("checkout_success");
+  }, [displayState]);
 
   // Poll /api/account while waiting for the Gumroad webhook to land — no client-side timer fakes activation.
   // Keyed off displayState (not the raw state) so both the poll and the timeout
