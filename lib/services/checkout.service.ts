@@ -5,7 +5,12 @@ import {
   getPurchaseByProviderReference,
   setPurchaseStatus,
 } from "@/lib/db/purchases";
-import { createCheckoutUrl, fetchSale, isValidWebhookToken } from "@/lib/integrations/gumroad";
+import {
+  createCheckoutUrl,
+  fetchSale,
+  isGumroadWebhookEvent,
+  isValidWebhookToken,
+} from "@/lib/integrations/gumroad";
 import { ConflictError, UnauthorizedError, ValidationError } from "@/lib/shared/errors";
 
 export class CheckoutService {
@@ -17,16 +22,22 @@ export class CheckoutService {
   }
 
   /**
-   * Gumroad's ping/resource_subscription callbacks are unsigned and
-   * form-encoded (not JSON). Authenticity comes from the shared `token` on
-   * the registered callback URL, then a mandatory server-to-server re-fetch
-   * of the sale from Gumroad's API before any purchase status is trusted —
-   * the route only extracts the raw body and token, everything else stays
-   * behind the service boundary like every other integration call.
+   * Gumroad's resource_subscription callbacks are unsigned and form-encoded
+   * (not JSON). Authenticity comes from the shared `token` on the registered
+   * callback URL, then a mandatory server-to-server re-fetch of the sale from
+   * Gumroad's API before any purchase status is trusted. Which resource_name
+   * fired (`sale`/`refund`/`dispute`) comes from the `event` query param we
+   * chose when registering each subscription — not inferred from the payload,
+   * since Gumroad's real API clients show no reliable "disputed" field to key
+   * off. The route only extracts the raw body, token, and event; everything
+   * else stays behind the service boundary like every other integration call.
    */
-  static async verifyAndApplyWebhook(rawBody: string, webhookToken: string | null): Promise<void> {
+  static async verifyAndApplyWebhook(rawBody: string, webhookToken: string | null, event: string | null): Promise<void> {
     if (!isValidWebhookToken(webhookToken)) {
       throw new UnauthorizedError("Invalid webhook token");
+    }
+    if (!isGumroadWebhookEvent(event)) {
+      throw new ValidationError("Invalid or missing event query param");
     }
 
     const params = new URLSearchParams(rawBody);
@@ -46,6 +57,7 @@ export class CheckoutService {
 
     // `purchases.status` has no separate "disputed" state — a dispute revokes
     // access the same way a refund does, conservatively, until it's resolved.
-    await setPurchaseStatus(purchase.id, sale.refunded || sale.disputed ? "refunded" : "completed");
+    const status = event === "sale" && !sale.refunded ? "completed" : "refunded";
+    await setPurchaseStatus(purchase.id, status);
   }
 }

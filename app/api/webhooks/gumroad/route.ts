@@ -10,8 +10,9 @@ export async function POST(request: NextRequest) {
   try {
     const rawBody = await request.text();
     const token = request.nextUrl.searchParams.get("token");
+    const event = request.nextUrl.searchParams.get("event");
 
-    await CheckoutService.verifyAndApplyWebhook(rawBody, token);
+    await CheckoutService.verifyAndApplyWebhook(rawBody, token, event);
     return ok({ received: true });
   } catch (error) {
     return handleApiError(error, "POST /api/webhooks/gumroad");

@@ -1,20 +1,30 @@
 /**
  * Gumroad integration — hosted checkout for Notto Lifetime Access (see LIFETIME_PRICE in lib/catalog.ts).
  *
- * Gumroad's Ping/resource_subscription callbacks are unsigned (no HMAC header),
- * so two safeguards stand in for signature verification:
+ * Gumroad's resource_subscription callbacks are unsigned (no HMAC header), so
+ * two safeguards stand in for signature verification:
  *
- * 1. The callback URL registered with Gumroad (via `PUT /v2/resource_subscriptions`
- *    for both the `sale` and `refund` resource names) embeds a shared secret as
- *    a `token` query param — only Gumroad's registered callback knows it.
+ * 1. The callback URL registered with Gumroad (via `PUT /v2/resource_subscriptions`,
+ *    once each for the `sale`, `refund`, and `dispute` resource names) embeds a
+ *    shared secret as a `token` query param, plus an `event` query param naming
+ *    which resource_name it was registered for — only Gumroad's registered
+ *    callbacks know the secret, and `event` tells the handler which transition
+ *    to apply without having to infer it from the (unconfirmed) response shape.
  * 2. Every inbound event is re-fetched server-to-server from
  *    `GET /v2/sales/:id` using GUMROAD_ACCESS_TOKEN before it's trusted, so a
  *    leaked callback URL alone can't forge a completed sale.
  *
  * Checkout correlation: the pending purchase's `reference` is appended to the
  * product URL as `?reference=<uuid>`. Gumroad echoes back any URL params on a
- * purchase in the ping's `url_params[reference]` field, which is how a given
- * sale is matched back to the purchase row `CheckoutService` created.
+ * purchase in the ping's `url_params` dictionary, which is how a given sale is
+ * matched back to the purchase row `CheckoutService` created (confirmed against
+ * the `URLParams map[string]string` field in github.com/maragudk/gumroad's
+ * PingRequest struct — a real, working Gumroad API client).
+ *
+ * Note: a `disputed` boolean was assumed on the sale object in an earlier draft
+ * of this file but doesn't appear in any real Gumroad client library checked
+ * (maragudk/gumroad's PingRequest, antiwork/gumroad-cli's sale view/list
+ * structs) — dropped in favor of the explicit `event` query param above.
  */
 
 export class GumroadNotConfiguredError extends Error {
@@ -54,12 +64,19 @@ export function isValidWebhookToken(token: string | null): boolean {
   return token !== null && token === expected;
 }
 
+export type GumroadWebhookEvent = "sale" | "refund" | "dispute";
+
+const GUMROAD_WEBHOOK_EVENTS: readonly GumroadWebhookEvent[] = ["sale", "refund", "dispute"];
+
+export function isGumroadWebhookEvent(value: string | null): value is GumroadWebhookEvent {
+  return value !== null && (GUMROAD_WEBHOOK_EVENTS as readonly string[]).includes(value);
+}
+
 export interface GumroadSale {
   saleId: string;
   email: string;
   reference: string | null;
   refunded: boolean;
-  disputed: boolean;
 }
 
 /** The only trust anchor for an inbound ping — re-fetches the sale straight from Gumroad's API. */
@@ -80,6 +97,5 @@ export async function fetchSale(saleId: string): Promise<GumroadSale> {
     email: sale.email,
     reference: sale.url_params?.reference ?? null,
     refunded: Boolean(sale.refunded),
-    disputed: Boolean(sale.disputed),
   };
 }
