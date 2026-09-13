@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { AuthPage } from "@/features/auth/auth-page";
 import { safeReturnPath } from "@/lib/navigation";
+
+export const metadata: Metadata = {
+  title: "Reset password",
+  robots: { index: false, follow: true },
+};
 
 export default async function ResetPasswordPage({
   searchParams,

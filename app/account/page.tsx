@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { AccountPage } from "@/features/account/account-page";
 import type { EntitlementStatus } from "@/features/auth/auth-provider";
+
+export const metadata: Metadata = { title: "Your account" };
 
 export default async function AccountRoute({ searchParams }: { searchParams: Promise<{ status?: string | string[] }> }) {
   const params = await searchParams;

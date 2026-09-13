@@ -35,10 +35,35 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${appUrl}/#organization`,
+      name: "Notto",
+      url: appUrl,
+      logo: `${appUrl}/notto-mark.png`,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${appUrl}/#website`,
+      url: appUrl,
+      name: "Notto",
+      description: "Distinctive, complete HTML pages you can copy into any coding agent.",
+      publisher: { "@id": `${appUrl}/#organization` },
+    },
+  ],
+};
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body className={bricolageGrotesque.variable}><Providers>{children}</Providers></body>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <Script
         src="https://cloud.umami.is/script.js"
         data-website-id="d4d9db45-f8af-4f20-951e-b7937c28648d"
