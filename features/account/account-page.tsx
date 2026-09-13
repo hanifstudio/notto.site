@@ -8,6 +8,8 @@ import { MinimalShell } from "@/components/layout/minimal-shell";
 import { Button, buttonClass } from "@/components/ui/button";
 import { AccessOffer } from "@/features/access/access-offer";
 import { type EntitlementStatus, useAuth } from "@/features/auth/auth-provider";
+import { ApiClientError, apiPost } from "@/lib/client/api-fetch";
+import { useAccount } from "@/lib/hooks/use-account";
 import { LIFETIME_PRICE } from "@/lib/catalog";
 
 const accountCopy = {
@@ -31,7 +33,33 @@ const accountCopy = {
 export function AccountPage({ previewStatus }: { previewStatus?: EntitlementStatus }) {
   const router = useRouter();
   const auth = useAuth();
+  const { refetch: refetchAccount } = useAccount();
   const [offerOpen, setOfferOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState("");
+
+  async function refreshAccess() {
+    setRefreshMessage("");
+    setRefreshing(true);
+    try {
+      const { result } = await apiPost<{ result: "granted" | "already_active" | "not_found" }>(
+        "/api/account/refresh",
+        {},
+      );
+      if (result === "granted") {
+        await refetchAccount();
+        setRefreshMessage("Access updated — you're all set.");
+      } else if (result === "already_active") {
+        setRefreshMessage("Your access is already active.");
+      } else {
+        setRefreshMessage("We couldn't find a completed purchase yet. If you already paid, this can take a minute — try again shortly.");
+      }
+    } catch (error) {
+      setRefreshMessage(error instanceof ApiClientError ? error.message : "Couldn't check right now. Try again shortly.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   if (!auth.session) {
     return (
@@ -79,6 +107,13 @@ export function AccountPage({ previewStatus }: { previewStatus?: EntitlementStat
             <Button variant="primary" onClick={() => setOfferOpen(true)}>{`Get all access — $${LIFETIME_PRICE}`}</Button>
           </div>
         ) : null}
+        {status === "free" ? (
+          <div className="account-actions">
+            <p>Already paid but access hasn&rsquo;t shown up?</p>
+            <Button onClick={refreshAccess} disabled={refreshing}>{refreshing ? "Checking…" : "Refresh access"}</Button>
+          </div>
+        ) : null}
+        {refreshMessage ? <p className="dialog-note" role="status">{refreshMessage}</p> : null}
         <div className="account-actions">
           <p>{status === "revoked" ? "Think this is wrong?" : "Questions about your purchase?"} <a href="mailto:support@notto.site">support@notto.site</a></p>
           <Button onClick={() => { auth.signOut(); router.push("/"); }}>Log out</Button>

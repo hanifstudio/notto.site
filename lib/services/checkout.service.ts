@@ -1,18 +1,25 @@
 import { randomUUID } from "node:crypto";
 
 import {
+  completePurchase,
+  createCompletedPurchase,
   createPendingPurchase,
+  getLatestPendingPurchaseByUserId,
   getPurchaseByProviderReference,
+  hasCompletedPurchase,
   setPurchaseStatus,
 } from "@/lib/db/purchases";
 import {
   createCheckoutUrl,
   extractReference,
   fetchSale,
+  findSaleIdsByEmail,
   isGumroadWebhookEvent,
   isValidWebhookToken,
 } from "@/lib/integrations/gumroad";
 import { ConflictError, UnauthorizedError, ValidationError } from "@/lib/shared/errors";
+
+export type ReconcileResult = "granted" | "already_active" | "not_found";
 
 export class CheckoutService {
   /** Creates a pending purchase row and returns the Gumroad checkout URL to redirect the user to. */
@@ -65,5 +72,31 @@ export class CheckoutService {
     // access the same way a refund does, conservatively, until it's resolved.
     const status = event === "sale" && !sale.refunded ? "completed" : "refunded";
     await setPurchaseStatus(purchase.id, status);
+  }
+
+  /**
+   * Self-service recovery for when a webhook never arrived or failed before
+   * this fix shipped — looks up the buyer's own Gumroad sales by email rather
+   * than requiring a working reference/webhook round trip. Each sale_id found
+   * is still re-verified through `fetchSale` before being trusted.
+   */
+  static async reconcileAccess(userId: string, email: string): Promise<ReconcileResult> {
+    if (await hasCompletedPurchase(userId)) return "already_active";
+
+    const saleIds = await findSaleIdsByEmail(email);
+    for (const saleId of saleIds) {
+      const sale = await fetchSale(saleId);
+      if (sale.refunded) continue;
+
+      const pending = await getLatestPendingPurchaseByUserId(userId);
+      if (pending) {
+        await completePurchase(pending.id, sale.saleId);
+      } else {
+        await createCompletedPurchase({ userId, providerReference: sale.saleId });
+      }
+      return "granted";
+    }
+
+    return "not_found";
   }
 }

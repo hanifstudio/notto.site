@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import { db } from "./index";
 import { purchases } from "./schema";
@@ -46,4 +46,30 @@ export async function getPurchaseByProviderReference(providerReference: string):
 
 export async function setPurchaseStatus(id: string, status: (typeof purchases.$inferInsert)["status"]): Promise<void> {
   await db.update(purchases).set({ status, updatedAt: new Date() }).where(eq(purchases.id, id));
+}
+
+export async function getLatestPendingPurchaseByUserId(userId: string): Promise<Purchase | undefined> {
+  const [purchase] = await db
+    .select()
+    .from(purchases)
+    .where(and(eq(purchases.userId, userId), eq(purchases.status, "pending")))
+    .orderBy(desc(purchases.createdAt))
+    .limit(1);
+  return purchase;
+}
+
+/** Completes a pending purchase, replacing its placeholder reference with the confirmed provider-side one. */
+export async function completePurchase(id: string, providerReference: string): Promise<void> {
+  await db
+    .update(purchases)
+    .set({ status: "completed", providerReference, updatedAt: new Date() })
+    .where(eq(purchases.id, id));
+}
+
+export async function createCompletedPurchase(input: { userId: string; providerReference: string }): Promise<Purchase> {
+  const [purchase] = await db
+    .insert(purchases)
+    .values({ userId: input.userId, providerReference: input.providerReference, status: "completed" })
+    .returning();
+  return purchase;
 }

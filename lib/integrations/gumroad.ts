@@ -119,3 +119,24 @@ export async function fetchSale(saleId: string): Promise<GumroadSale> {
 export function extractReference(params: URLSearchParams): string | null {
   return params.get("url_params[reference]");
 }
+
+/**
+ * Lists sale IDs for a buyer email — the self-service fallback when a
+ * webhook never arrived or was dropped (`GET /v2/sales` supports `email` per
+ * Gumroad's view_sales scope). Only IDs come back; each is re-verified
+ * through `fetchSale` before being trusted, same as an inbound ping.
+ */
+export async function findSaleIdsByEmail(email: string): Promise<string[]> {
+  const accessToken = requireEnv("GUMROAD_ACCESS_TOKEN");
+  const url = new URL(`${GUMROAD_API_BASE}/sales`);
+  url.searchParams.set("access_token", accessToken);
+  url.searchParams.set("email", email);
+
+  const response = await fetch(url.toString());
+  const json = await response.json();
+  if (!response.ok || !json.success) {
+    throw new GumroadApiError(`Gumroad sales lookup for ${email} failed.`);
+  }
+
+  return (json.sales ?? []).map((sale: { id: string }) => sale.id);
+}
