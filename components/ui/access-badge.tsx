@@ -1,4 +1,3 @@
-import { Check } from "lucide-react";
 import type { AccessLevel } from "@/lib/catalog";
 import { cn } from "@/lib/cn";
 
@@ -10,12 +9,7 @@ export function AccessBadge({
   entitled?: boolean;
 }) {
   if (access === "plus" && entitled) {
-    return (
-      <span className="access-badge access-badge--entitled">
-        <Check aria-hidden="true" />
-        Included in your access
-      </span>
-    );
+    return null;
   }
 
   return (

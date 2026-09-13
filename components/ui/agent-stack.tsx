@@ -2,11 +2,11 @@ import Image from "next/image";
 
 const agents = [
   { name: "Claude", logo: "/images/agents/claude.png", rotate: -10, lift: 0 },
-  { name: "OpenAI", logo: "/images/agents/openai.png", rotate: 6, lift: 6 },
-  { name: "Cursor", logo: "/images/agents/cursor.png", rotate: -6, lift: -4 },
-  { name: "Lovable", logo: "/images/agents/lovable.png", rotate: 9, lift: 4 },
-  { name: "Emergent", logo: "/images/agents/emergent.png", rotate: -13, lift: -2 },
-  { name: "Antigravity", logo: "/images/agents/antigravity.png", rotate: 8, lift: 2 },
+  { name: "OpenAI", logo: "/images/agents/openai.png", rotate: 6, lift: 3 },
+  { name: "Cursor", logo: "/images/agents/cursor.png", rotate: -6, lift: -2 },
+  { name: "Lovable", logo: "/images/agents/lovable.png", rotate: 9, lift: 2 },
+  { name: "Emergent", logo: "/images/agents/emergent.png", rotate: -13, lift: -1 },
+  { name: "Antigravity", logo: "/images/agents/antigravity.png", rotate: 8, lift: 1 },
 ];
 
 export function AgentStack() {

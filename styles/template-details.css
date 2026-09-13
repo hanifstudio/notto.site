@@ -138,12 +138,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  opacity: 0.8;
-  transition: opacity 200ms var(--ease-out-quint);
-}
-
-.agent-stack-row:hover {
-  opacity: 1;
 }
 
 .agent-stack-row > span {
