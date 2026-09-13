@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, UserRound } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Wordmark } from "@/components/layout/wordmark";
 import { useAuth } from "@/features/auth/auth-provider";
 
@@ -18,8 +18,7 @@ export function SiteHeader({ back }: { back?: { label: string; href: string } })
         ) : null}
         <Wordmark />
       </div>
-      <Link className={session ? "account-link" : "login-link"} href={session ? "/account" : "/login"}>
-        {session ? <UserRound aria-hidden="true" /> : null}
+      <Link className="auth-link" href={session ? "/account" : "/login"}>
         {session ? "Account" : "Log in"}
       </Link>
     </header>

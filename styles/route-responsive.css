@@ -12,7 +12,7 @@
   .header-left { gap: 8px; }
   .back-link { width: 44px; padding: 0; justify-content: center; font-size: 0; }
   .back-link svg { width: 16px; height: 16px; }
-  .account-link { min-height: 44px; }
+  .auth-link { min-height: 44px; }
   .entitled-summary { width: 100%; min-width: 0; }
 
   .template-detail { padding: 20px 16px 32px; gap: 26px; }

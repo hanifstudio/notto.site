@@ -16,8 +16,7 @@
   gap: 12px;
 }
 
-.back-link,
-.account-link {
+.back-link {
   min-height: 36px;
   padding-inline: 12px;
   display: inline-flex;
@@ -29,14 +28,12 @@
   transition: color 150ms var(--ease-out-quint), background 150ms var(--ease-out-quint);
 }
 
-.back-link:hover,
-.account-link:hover {
+.back-link:hover {
   color: var(--color-fg);
   background: var(--color-surface-hover);
 }
 
-.back-link svg,
-.account-link svg {
+.back-link svg {
   width: 14px;
   height: 14px;
 }

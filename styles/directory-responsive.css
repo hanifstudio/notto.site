@@ -32,7 +32,7 @@
   .app-shell { border-radius: var(--radius-lg); }
 
   .site-header { padding-inline: 16px; }
-  .login-link {
+  .auth-link {
     min-height: 44px;
     padding-inline: 18px;
   }
