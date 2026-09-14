@@ -10,6 +10,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+export const userRole = pgEnum("user_role", ["user", "admin"]);
 export const templateAccess = pgEnum("template_access", ["free", "plus"]);
 export const templateStatus = pgEnum("template_status", ["draft", "published"]);
 export const purchaseStatus = pgEnum("purchase_status", [
@@ -22,6 +23,7 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  role: userRole("role").notNull().default("user"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   // Rate-limits POST /api/account/refresh (self-service Gumroad reconciliation) to once per 5 minutes.
   lastAccessRefreshAt: timestamp("last_access_refresh_at", { withTimezone: true }),

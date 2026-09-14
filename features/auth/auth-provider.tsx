@@ -10,6 +10,7 @@ export type AuthSession = {
   email: string;
   entitlement: EntitlementStatus;
   purchasedAt?: string;
+  isAdmin: boolean;
 };
 
 type AuthContextValue = {
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email,
           entitlement: account?.entitlement ?? "free",
           purchasedAt: account?.purchasedAt ?? undefined,
+          isAdmin: account?.isAdmin ?? false,
         }
       : null;
 

@@ -12,6 +12,7 @@ import { DirectoryFilters } from "@/features/directory/directory-filters";
 import { DirectoryLoadFailure, DirectorySkeleton } from "@/features/directory/directory-status";
 import { TemplateCard } from "@/features/directory/template-card";
 import { useDirectoryFilters } from "@/features/directory/use-directory-filters";
+import { useTemplateAdmin } from "@/hooks/use-template-admin";
 import { useTemplateCopy } from "@/hooks/use-template-copy";
 import { track } from "@/lib/client/analytics";
 import { useTemplates, type TemplatesPage } from "@/lib/hooks/use-templates";
@@ -50,7 +51,11 @@ export function DirectoryPage({
       setOfferOpen(true);
     },
   });
+  const admin = useTemplateAdmin();
   const entitled = session?.entitlement === "active";
+  const isAdmin = session?.isAdmin ?? false;
+  const activeToast = admin.toast ?? copy.toast;
+  const dismissActiveToast = admin.toast ? admin.dismissToast : copy.dismissToast;
 
   const loadedTemplates = templatesQuery.data?.pages.flatMap((page) => page.templates) ?? [];
   const total = templatesQuery.data?.pages[0]?.total ?? 0;
@@ -137,6 +142,10 @@ export function DirectoryPage({
                           copyStatus={copy.statusFor(template.slug)}
                           onCopy={(t) => copy.copy(t, "card")}
                           onPrefetchCopy={copy.prefetch}
+                          isAdmin={isAdmin}
+                          adminStatus={admin.statusFor(template.slug)}
+                          onSetAccess={(t, access) => admin.setAccess(t, access)}
+                          onPinToTop={(t) => admin.pinToTop(t)}
                         />
                       ))}
                     </div>
@@ -163,7 +172,7 @@ export function DirectoryPage({
         returnTo={offerTemplate ? `/templates/${offerTemplate.slug}` : "/"}
         onDismiss={() => setOfferOpen(false)}
       />
-      <Toast toast={copy.toast} onDismiss={copy.dismissToast} />
+      <Toast toast={activeToast} onDismiss={dismissActiveToast} />
     </div>
   );
 }

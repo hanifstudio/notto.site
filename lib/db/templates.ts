@@ -96,3 +96,23 @@ export async function getTemplateBySlug(slug: string): Promise<Template | undefi
     .limit(1);
   return template;
 }
+
+export async function updateTemplateAccess(slug: string, access: "free" | "plus"): Promise<Template | undefined> {
+  const [template] = await db
+    .update(templates)
+    .set({ access, updatedAt: new Date() })
+    .where(eq(templates.slug, slug))
+    .returning();
+  return template;
+}
+
+/** Bumps published_at to now — the directory's sort key — so the template sorts first without a dedicated "pinned" column/index. */
+export async function bumpTemplateToFront(slug: string): Promise<Template | undefined> {
+  const now = new Date();
+  const [template] = await db
+    .update(templates)
+    .set({ publishedAt: now, updatedAt: now })
+    .where(eq(templates.slug, slug))
+    .returning();
+  return template;
+}

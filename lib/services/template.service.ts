@@ -1,15 +1,18 @@
 import { DIRECTORY_PAGE_SIZE, type TemplateSummary } from "@/lib/catalog";
 import { hasCompletedPurchase } from "@/lib/db/purchases";
+import { isAdmin } from "@/lib/db/users";
 import {
+  bumpTemplateToFront,
   countTemplateSummaries,
   getTemplateBySlug,
   listTemplateSummaries,
   listTemplateSummariesPage,
+  updateTemplateAccess,
   type TemplateListCursor,
   type TemplateListFilters,
   type TemplateSummaryRow,
 } from "@/lib/db/templates";
-import { ApiError, NotFoundError } from "@/lib/shared/errors";
+import { ApiError, ForbiddenError, NotFoundError } from "@/lib/shared/errors";
 
 export type TemplateDirectoryPage = {
   templates: TemplateSummary[];
@@ -105,16 +108,37 @@ export class TemplateService {
     return [...sameCategory, ...remaining].slice(0, limit);
   }
 
-  /** Free templates are copyable by anyone. Plus templates require an authenticated user with All Access. */
+  /** Free templates are copyable by anyone. Plus templates require an authenticated user with All Access (or an admin). */
   static async getCopySource(slug: string, userId: string | null): Promise<string> {
     const template = await getTemplateBySlug(slug);
     if (!template) throw new NotFoundError("Template not found.");
 
     if (template.access === "plus") {
-      const hasAccess = userId ? await hasCompletedPurchase(userId) : false;
+      const hasAccess = userId ? (await isAdmin(userId)) || (await hasCompletedPurchase(userId)) : false;
       if (!hasAccess) throw new PlusAccessRequiredError();
     }
 
     return template.sourceHtml;
+  }
+
+  /** Admin-only: flip a template's access tier and/or bump it to the front of the directory. */
+  static async adminUpdate(
+    userId: string,
+    slug: string,
+    patch: { access?: "free" | "plus"; pinToTop?: boolean },
+  ): Promise<TemplateSummary> {
+    if (!(await isAdmin(userId))) throw new ForbiddenError("Admin access required.");
+
+    let template = await getTemplateBySlug(slug);
+    if (!template) throw new NotFoundError("Template not found.");
+
+    if (patch.access && patch.access !== template.access) {
+      template = (await updateTemplateAccess(slug, patch.access)) ?? template;
+    }
+    if (patch.pinToTop) {
+      template = (await bumpTemplateToFront(slug)) ?? template;
+    }
+
+    return toSummary(template);
   }
 }

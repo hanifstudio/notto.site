@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useRef } from "react";
 import { AccessBadge } from "@/components/ui/access-badge";
 import { CopyButton, type CopyStatus } from "@/components/ui/copy-button";
+import { AdminTemplateMenu } from "@/features/directory/admin-template-menu";
+import type { AdminActionStatus } from "@/hooks/use-template-admin";
 import type { TemplateSummary } from "@/lib/catalog";
 
 export function TemplateCard({
@@ -11,12 +13,20 @@ export function TemplateCard({
   copyStatus,
   onCopy,
   onPrefetchCopy,
+  isAdmin = false,
+  adminStatus = "idle",
+  onSetAccess,
+  onPinToTop,
 }: {
   template: TemplateSummary;
   entitled: boolean;
   copyStatus: CopyStatus;
   onCopy: (template: TemplateSummary) => void;
   onPrefetchCopy: (template: TemplateSummary) => void;
+  isAdmin?: boolean;
+  adminStatus?: AdminActionStatus;
+  onSetAccess?: (template: TemplateSummary, access: "free" | "plus") => void;
+  onPinToTop?: (template: TemplateSummary) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -52,11 +62,21 @@ export function TemplateCard({
             aria-hidden="true"
           />
         ) : null}
-        <CopyButton
-          locked={template.access === "plus" && !entitled}
-          status={copyStatus}
-          onClick={() => onCopy(template)}
-        />
+        <div className="thumbnail-actions">
+          <CopyButton
+            locked={template.access === "plus" && !entitled}
+            status={copyStatus}
+            onClick={() => onCopy(template)}
+          />
+          {isAdmin ? (
+            <AdminTemplateMenu
+              template={template}
+              pending={adminStatus === "pending"}
+              onSetAccess={(access) => onSetAccess?.(template, access)}
+              onPinToTop={() => onPinToTop?.(template)}
+            />
+          ) : null}
+        </div>
       </div>
       <div className="card-body">
         <div className="card-title-row">

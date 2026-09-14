@@ -14,6 +14,7 @@ export async function GET() {
       entitlement: entitlement.status,
       purchasedAt: entitlement.purchasedAt?.toISOString() ?? null,
       nextAccessRefreshAt: entitlement.nextAccessRefreshAt?.toISOString() ?? null,
+      isAdmin: entitlement.isAdmin,
     });
   } catch (error) {
     return handleApiError(error, "GET /api/account");

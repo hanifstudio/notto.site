@@ -11,6 +11,7 @@ export type Account = {
   entitlement: "free" | "active" | "revoked";
   purchasedAt: string | null;
   nextAccessRefreshAt: string | null;
+  isAdmin: boolean;
 };
 
 async function fetchAccount(): Promise<Account> {

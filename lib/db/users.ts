@@ -27,3 +27,8 @@ export async function updateUserPassword(id: string, passwordHash: string): Prom
 export async function touchAccessRefresh(id: string): Promise<void> {
   await db.update(users).set({ lastAccessRefreshAt: new Date() }).where(eq(users.id, id));
 }
+
+export async function isAdmin(id: string): Promise<boolean> {
+  const user = await getUserById(id);
+  return user?.role === "admin";
+}
